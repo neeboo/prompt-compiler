@@ -1,0 +1,61 @@
+# Rust
+/target
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.rocksdb/
+data/
+
+# Configuration
+config.local.toml
+.env
+.env.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# Build artifacts
+dist/
+build/
+
+# Coverage reports
+coverage/
+*.profraw
+
+# Benchmarking
+criterion/
+
+# Testing
+test_data/
+*.test

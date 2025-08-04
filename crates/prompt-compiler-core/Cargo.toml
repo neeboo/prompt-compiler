@@ -1,0 +1,26 @@
+[package]
+name = "prompt-compiler-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+description = "Core compiler logic and IR for prompt compilation"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+
+prompt-compiler-weights.workspace = true
+prompt-compiler-crypto.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,0 +1,27 @@
+[package]
+name = "prompt-compiler-sdk"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+description = "SDK for integrating prompt compiler into other applications"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+prompt-compiler-core.workspace = true
+prompt-compiler-storage.workspace = true
+prompt-compiler-weights.workspace = true
+prompt-compiler-crypto.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

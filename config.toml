@@ -1,0 +1,15 @@
+[compiler]
+default_model = "gpt-4"
+default_token_budget = 1000
+enable_weight_analysis = true
+analyzers = ["semantic", "context"]
+optimizers = ["weight", "budget", "priority"]
+
+[storage]
+database_path = "./prompt_compiler_db"
+enable_compression = true
+max_cache_size = 1000
+
+[crypto]
+enable_signing = true
+key_path = "~/.prompt_compiler/keys"

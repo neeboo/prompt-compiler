@@ -1,0 +1,2 @@
+# This file ensures the benches directory is tracked by git
+# Benchmark tests will be added here

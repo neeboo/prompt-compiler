@@ -1,0 +1,28 @@
+[package]
+name = "prompt-compiler-weights"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+description = "Weight dynamics computation based on in-context learning theory"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+nalgebra = { workspace = true, features = ["serde-serialize"] }
+ndarray.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+rand.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+tempfile.workspace = true
+
+[[bench]]
+name = "weight_dynamics"
+harness = false

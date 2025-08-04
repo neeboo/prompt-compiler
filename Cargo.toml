@@ -1,0 +1,74 @@
+[workspace]
+members = [
+    "crates/prompt-compiler-core",
+    "crates/prompt-compiler-cli",
+    "crates/prompt-compiler-storage",
+    "crates/prompt-compiler-crypto",
+    "crates/prompt-compiler-weights",
+    "crates/prompt-compiler-web",
+    "crates/prompt-compiler-sdk"
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["neeboo <neeboo@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/neeboo/prompt-compiler"
+homepage = "https://github.com/neeboo/prompt-compiler"
+documentation = "https://docs.rs/prompt-compiler"
+keywords = ["ai", "prompt", "compiler", "optimization", "transformer"]
+categories = ["command-line-utilities", "science", "text-processing"]
+
+[workspace.dependencies]
+# Core numerical computing
+nalgebra = { version = "0.32", features = ["serde-serialize"] }
+ndarray = "0.15"
+
+# High-performance storage
+rocksdb = "0.21"
+
+# Cryptographic functionality
+ed25519-dalek = "2.0"
+sha2 = "0.10"
+
+# Serialization and data handling
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# CLI and user interface
+clap = { version = "4.0", features = ["derive", "color"] }
+colored = "2.0"
+
+# Web framework
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+hex = "0.4"
+rand = "0.8"
+
+# Development dependencies
+criterion = "0.5"
+tempfile = "3.0"
+
+# Workspace crates
+prompt-compiler-core = { path = "crates/prompt-compiler-core" }
+prompt-compiler-cli = { path = "crates/prompt-compiler-cli" }
+prompt-compiler-storage = { path = "crates/prompt-compiler-storage" }
+prompt-compiler-crypto = { path = "crates/prompt-compiler-crypto" }
+prompt-compiler-weights = { path = "crates/prompt-compiler-weights" }
+prompt-compiler-web = { path = "crates/prompt-compiler-web" }
+prompt-compiler-sdk = { path = "crates/prompt-compiler-sdk" }
