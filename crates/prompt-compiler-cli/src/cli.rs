@@ -3,7 +3,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use colored::*;
-use serde_json;
 use prompt_compiler_core::compiler::analyzers::{ContextLearningAnalyzer, SemanticAnalyzer};
 use prompt_compiler_core::compiler::generators::WeightAwareGenerator;
 use prompt_compiler_core::compiler::optimizers::{
@@ -11,9 +10,8 @@ use prompt_compiler_core::compiler::optimizers::{
 };
 use prompt_compiler_core::{ModelTarget, PromptCompiler, PromptIR};
 use prompt_compiler_core::{PromptAnalyzer, PromptGenerator, PromptOptimizer};
-use prompt_compiler_weights::{
-    create_random_vector, DynamicsConfig, ImplicitDynamics,
-};
+use prompt_compiler_weights::{create_random_vector, DynamicsConfig, ImplicitDynamics};
+use serde_json;
 
 #[derive(Parser)]
 #[command(name = "pc")]

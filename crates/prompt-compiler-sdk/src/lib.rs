@@ -1,6 +1,6 @@
 //! SDK for integrating prompt compiler into other applications
 
-use prompt_compiler_core::{PromptCompiler, PromptIR, CompiledState};
+use prompt_compiler_core::{PromptCompiler, CompiledState};
 use prompt_compiler_storage::StateDB;
 use std::sync::Arc;
 use tokio::sync::Mutex;

@@ -109,153 +109,163 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
+
+### Quick Test
+
+```bash
+# Test the CLI tool
 ./target/release/pc weight-demo -c 5 --verbose
 ```
 
 ## 🏗️ Project Structure
 
 ```
-prompt-compiler/                    # Monorepo root
-├── crates/                        # 📦 All crates
-│   ├── prompt-compiler-core/      # 🧠 Core compiler logic
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   │       ├── lib.rs            # Library entry point
-│   │       ├── error.rs          # Error handling
-│   │       ├── ir.rs             # Intermediate Representation
-│   │       └── compiler/         # Compilation pipeline
-│   │           ├── mod.rs        # Main compiler logic
-│   │           ├── analyzers/    # Semantic analysis, context learning
-│   │           ├── optimizers/   # Weight update, token budget optimizers
-│   │           └── generators/   # Standard & weight-aware generators
+prompt-compiler/
+├── 📦 crates/                     # Core crates collection
+│   ├── 🧠 prompt-compiler-core/   # Core compilation engine
+│   │   ├── src/
+│   │   │   ├── lib.rs            # Main library interface
+│   │   │   ├── error.rs          # Error types & handling
+│   │   │   ├── ir.rs             # Intermediate representation
+│   │   │   └── compiler/         # Compilation pipeline
+│   │   │       ├── mod.rs        # Pipeline orchestration
+│   │   │       ├── analyzers/    # Prompt analysis modules
+│   │   │       ├── optimizers/   # Optimization strategies
+│   │   │       └── generators/   # Output generation
+│   │   └── Cargo.toml
 │   │
-│   ├── prompt-compiler-cli/       # 🖥️ Command-line interface
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   │       ├── main.rs           # CLI entry point (pc binary)
-│   │       ├── lib.rs            # CLI library
-│   │       └── cli.rs            # Command implementations
+│   ├── 🖥️  prompt-compiler-cli/   # Command-line interface
+│   │   ├── src/
+│   │   │   ├── main.rs           # Entry point → `pc` binary
+│   │   │   ├── lib.rs            # CLI library functions
+│   │   │   └── cli.rs            # Command implementations
+│   │   └── Cargo.toml
 │   │
-│   ├── prompt-compiler-weights/   # ⚖️ Weight dynamics computation
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   │       └── lib.rs            # Weight update theory implementation
+│   ├── ⚖️  prompt-compiler-weights/ # Weight dynamics engine
+│   │   ├── src/
+│   │   │   └── lib.rs            # ICL weight update theory
+│   │   ├── benches/
+│   │   │   └── weight_dynamics.rs # Performance benchmarks
+│   │   └── Cargo.toml
 │   │
-│   ├── prompt-compiler-storage/   # 🗄️ Persistence layer
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   │       ├── lib.rs            # Storage module entry
-│   │       ├── state_db.rs       # RocksDB state management
-│   │       └── dag.rs            # Versioned DAG operations
+│   ├── 🗄️  prompt-compiler-storage/ # Persistence layer
+│   │   ├── src/
+│   │   │   ├── lib.rs            # Storage interface
+│   │   │   ├── state_db.rs       # RocksDB operations
+│   │   │   └── dag.rs            # Version control DAG
+│   │   └── Cargo.toml
 │   │
-│   ├── prompt-compiler-crypto/    # 🔐 Cryptographic utilities
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   │       └── lib.rs            # Ed25519 signatures & hashing
+│   ├── 🔐 prompt-compiler-crypto/  # Security & verification
+│   │   ├── src/
+│   │   │   └── lib.rs            # Ed25519 + hashing
+│   │   └── Cargo.toml
 │   │
-│   ├── prompt-compiler-web/       # 🌐 Web interface & API
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   │       ├── main.rs           # Web server entry (pc-server binary)
-│   │       └── lib.rs            # REST API implementation
+│   ├── 🌐 prompt-compiler-web/     # Web API server
+│   │   ├── src/
+│   │   │   ├── main.rs           # Server → `pc-server` binary
+│   │   │   └── lib.rs            # REST API endpoints
+│   │   └── Cargo.toml
 │   │
-│   └── prompt-compiler-sdk/       # 📚 Integration SDK
-│       ├── Cargo.toml
-│       └── src/
-│           └── lib.rs            # High-level SDK for applications
+│   └── 📚 prompt-compiler-sdk/     # Integration SDK
+│       ├── src/
+│       │   └── lib.rs            # High-level client API
+│       └── Cargo.toml
 │
-├── docs/                          # 📚 Documentation
-├── examples/                      # 🔍 Usage examples
-├── tests/                         # 🧪 Integration tests
-├── benches/                       # ⚡ Performance benchmarks
-├── Cargo.toml                     # 🏗️ Workspace configuration
-├── config.toml                    # ⚙️ Default configuration
-├── README.md                      # 📖 Project documentation
-└── .gitignore                     # 🚫 Git ignore rules
+├── 📁 docs/                       # Documentation
+├── 🔍 examples/                   # Usage examples
+├── 🧪 tests/                      # Integration tests
+├── ⚡ benches/                    # Workspace benchmarks
+├── ⚙️  config.toml                # Default configuration
+├── 🏗️  Cargo.toml                # Workspace manifest
+└── 📖 README.md                   # This file
 ```
 
-### Core Architecture
+### 🎯 Core Architecture Flow
+
+```mermaid
+graph TD
+    A[📝 Raw Prompt] --> B[🧠 Compiler Core]
+    B --> C[⚖️ Weight Analysis]
+    B --> D[🔍 Semantic Analysis] 
+    C --> E[⚡ Optimization]
+    D --> E
+    E --> F[📦 Compiled Prompt]
+    F --> G[🗄️ Storage]
+    G --> H[🔐 Cryptographic Signing]
+```
+
+### 📊 Dependency Graph
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Raw Prompt    │───▶│  Compiler Pipeline │───▶│ Optimized Prompt │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+                    ┌─────────────────┐
+                    │  🧠 Core Engine │
+                    └─────────┬───────┘
                               │
-                              ▼
-                    ┌──────────────────┐
-                    │ Weight Dynamics  │
-                    │ (Theory-Based)   │
-                    └──────────────────┘
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+   ┌─────────┐         ┌─────────────┐       ┌─────────────┐
+   │ ⚖️ Weights │         │ 🗄️ Storage   │       │ 🔐 Crypto   │
+   └─────────┘         └─────────────┘       └─────────────┘
+        │                     │                     │
+        └─────────────────────┼─────────────────────┘
                               │
-                              ▼
-                    ┌──────────────────┐
-                    │ Persistent Store │
-                    │ (RocksDB + DAG)  │
-                    └──────────────────┘
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+   ┌─────────┐         ┌─────────────┐       ┌─────────────┐
+   │ 🖥️ CLI   │         │ 🌐 Web API  │       │ 📚 SDK      │
+   └─────────┘         └─────────────┘       └─────────────┘
 ```
 
-### Crate Dependencies
+### 🚀 Binary Outputs
 
-```
-prompt-compiler-cli ────┐
-                        ├──▶ prompt-compiler-core ────┐
-prompt-compiler-web ────┘                            │
-                                                     ├──▶ prompt-compiler-weights
-prompt-compiler-sdk ──────▶ prompt-compiler-storage ─┤
-                                                     └──▶ prompt-compiler-crypto
-```
+| Binary | Crate | Description |
+|--------|-------|-------------|
+| `pc` | prompt-compiler-cli | 🖥️ Command-line tool for prompt compilation |
+| `pc-server` | prompt-compiler-web | 🌐 Web server with REST API |
 
-## 🔧 Technology Stack
+### 🔧 Technology Stack
 
-### Core Backend
-- **Rust** - Systems programming language ensuring performance and safety
-- **RocksDB** - High-performance key-value store for state persistence
-- **Ed25519** - Elliptic curve digital signature algorithm
+<table>
+<tr>
+<td><strong>🧠 Core</strong></td>
+<td>
 
-### Mathematical Computing
-- **nalgebra** - Linear algebra library for weight matrix computations
-- **ndarray** - N-dimensional array operations
+- **Rust** - Memory-safe systems programming
+- **nalgebra** - Linear algebra for weight computations
+- **ndarray** - Multi-dimensional array operations
 
-### CLI and Utilities
-- **clap** - Command-line argument parsing
-- **serde** - Serialization/deserialization framework
-- **tokio** - Asynchronous runtime
+</td>
+</tr>
+<tr>
+<td><strong>🗄️ Storage</strong></td>
+<td>
 
-### Compilation Pipeline
+- **RocksDB** - High-performance key-value store
+- **serde** - Serialization framework
 
-```
-Raw Prompt → Analyzers → Optimizers → Weight Update Computation → Generators → Optimized Prompt
-     ↓           ↓            ↓                ↓                      ↓
- Semantic    Structure     Dynamics         Model                Final
- Analysis → Optimization → Calculation → Adaptation →        Output
-```
+</td>
+</tr>
+<tr>
+<td><strong>🔐 Security</strong></td>
+<td>
 
-## 📦 Dependencies
+- **Ed25519** - Digital signatures
+- **SHA-256** - Cryptographic hashing
 
-### Core Dependencies
-```toml
-# Numerical computing
-nalgebra = "0.32"         # Linear algebra operations
-ndarray = "0.15"          # Multi-dimensional arrays
+</td>
+</tr>
+<tr>
+<td><strong>🌐 Web</strong></td>
+<td>
 
-# Storage
-rocksdb = "0.21"          # High-performance database
+- **Axum** - Modern async web framework
+- **Tower** - Service-oriented middleware
 
-# Cryptography
-ed25519-dalek = "2.0"     # Digital signatures
-sha2 = "0.10"             # Hash functions
-
-# Serialization
-serde = "1.0"             # Serialization framework
-serde_json = "1.0"        # JSON support
-
-# CLI
-clap = "4.0"              # Command-line parsing
-colored = "2.0"           # Colored output
-
-# Async
-tokio = "1.0"             # Async runtime
-```
+</td>
+</tr>
+</table>
 
 ## 🔬 Theoretical Implementation
 
