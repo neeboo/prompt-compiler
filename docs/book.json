@@ -1,0 +1,37 @@
+{
+  "title": "Prompt Compiler Documentation",
+  "description": "A state-of-the-art AI prompt compiler based on ICL weight update dynamics",
+  "author": "neeboo <ghostcorn@gmail.com>",
+  "language": "en",
+  "gitbook": ">=3.0.0",
+  "structure": {
+    "readme": "README.md",
+    "summary": "SUMMARY.md"
+  },
+  "plugins": [
+    "highlight",
+    "search",
+    "sharing",
+    "fontsettings"
+  ],
+  "pluginsConfig": {
+    "sharing": {
+      "facebook": false,
+      "twitter": true,
+      "google": false,
+      "weibo": false,
+      "instapaper": false,
+      "vk": false,
+      "all": ["twitter"]
+    },
+    "fontsettings": {
+      "theme": "white",
+      "family": "sans",
+      "size": 2
+    }
+  },
+  "variables": {
+    "version": "0.1.0",
+    "project_name": "Prompt Compiler"
+  }
+}
