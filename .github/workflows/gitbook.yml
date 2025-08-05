@@ -2,14 +2,10 @@ name: Deploy GitBook to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]  # 只监听main分支
     paths:
       - 'docs/**'
       - '.github/workflows/gitbook.yml'
-  pull_request:
-    branches: [ main, master ]
-    paths:
-      - 'docs/**'
 
 jobs:
   build-and-deploy:
@@ -18,12 +14,15 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Build and Deploy GitBook
       uses: zanderzhao/gitbook-action@v1.2.4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         source_dir: docs
+        source_branch: main  # 明确指定源分支为main
         gitbook_pdf: false
         gitbook_epub: false
         gitbook_mobi: false
