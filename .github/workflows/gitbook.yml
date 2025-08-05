@@ -18,57 +18,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Build and Deploy GitBook
+      uses: zanderzhao/gitbook-action@v1.2.4
       with:
-        fetch-depth: 0
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '16'  # 使用Node.js 16，GitBook CLI在这个版本上工作正常
-
-    - name: Install GitBook CLI
-      run: |
-        # 修复graceful-fs兼容性问题
-        npm install -g gitbook-cli --force
-        # 安装特定版本的graceful-fs
-        cd $(npm root -g)/gitbook-cli
-        npm install graceful-fs@4.2.0 --save
-        gitbook --version
-
-    - name: Install GitBook plugins
-      run: |
-        cd docs
-        gitbook install
-
-    - name: Build GitBook
-      run: |
-        cd docs
-        gitbook build
-        # 创建 .nojekyll 文件以支持 GitBook 的下划线文件
-        touch _book/.nojekyll
-        # 复制 CNAME 文件如果存在
-        if [ -f CNAME ]; then cp CNAME _book/; fi
-
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_book
-        publish_branch: gh-pages
-        force_orphan: true
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        commit_message: '🚀 Deploy GitBook documentation'
-
-    - name: Comment PR with preview link
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: '📖 GitBook documentation preview will be available at: https://' + context.repo.owner + '.github.io/' + context.repo.repo + ' after merge.'
-          })
+        token: ${{ secrets.GITHUB_TOKEN }}
+        source_dir: docs
+        gitbook_pdf: false
+        gitbook_epub: false
+        gitbook_mobi: false
