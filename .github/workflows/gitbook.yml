@@ -2,7 +2,7 @@ name: Deploy GitBook to GitHub Pages
 
 on:
   push:
-    branches: [ main ]  # 只监听main分支
+    branches: [ main ]
     paths:
       - 'docs/**'
       - '.github/workflows/gitbook.yml'
@@ -19,16 +19,27 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
-    - name: Build and Deploy GitBook
-      uses: zanderzhao/gitbook-action@v1.2.4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        source_dir: docs
-        source_branch: main  # 明确指定源分支为main
-        publish_push_force: true  # 强制推送以解决权限问题
-        gitbook_pdf: false
-        gitbook_epub: false
-        gitbook_mobi: false
+        node-version: '16'
+
+    - name: Install GitBook CLI and build
+      run: |
+        npm install -g gitbook-cli
+        cd docs
+        gitbook install
+        gitbook build
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./docs/_book
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
