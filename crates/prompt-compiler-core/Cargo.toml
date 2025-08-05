@@ -18,8 +18,8 @@ thiserror.workspace = true
 anyhow.workspace = true
 uuid.workspace = true
 chrono.workspace = true
-
-prompt-compiler-weights.workspace = true
+nalgebra = "0.32"
+prompt-compiler-weights = { path = "../prompt-compiler-weights" }
 prompt-compiler-crypto.workspace = true
 
 [dev-dependencies]

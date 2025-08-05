@@ -1,20 +1,38 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use prompt_compiler_weights::{create_random_vector, DynamicsConfig, ImplicitDynamics};
+use prompt_compiler_weights::{
+    create_random_vector, create_random_weights, DynamicsConfig, ImplicitDynamics, WeightUpdate,
+    WeightUpdateMetadata,
+};
 
 fn benchmark_weight_update_creation(c: &mut Criterion) {
+    let weights = create_random_weights(64, 64);
     let context_vector = create_random_vector(64);
     let query_vector = create_random_vector(64);
-    let config = DynamicsConfig::default();
-    let mut dynamics = ImplicitDynamics::new(64, 64, config).unwrap();
+
+    let metadata = WeightUpdateMetadata {
+        target_model: "transformer".to_string(),
+        layer_id: "mlp_0".to_string(),
+        context_length: 1,
+        computed_at: 0,
+        update_norm: 0.0,
+    };
 
     c.bench_function("weight_update_creation", |b| {
-        b.iter(|| dynamics.update_step(black_box(&context_vector), black_box(&query_vector)))
+        b.iter(|| {
+            WeightUpdate::new(
+                black_box(&weights),
+                black_box(context_vector.clone()),
+                black_box(query_vector.clone()),
+                black_box(metadata.clone()),
+            )
+        })
     });
 }
 
 fn benchmark_sequential_updates(c: &mut Criterion) {
+    let weights = create_random_weights(32, 32);
     let config = DynamicsConfig::default();
-    let mut dynamics = ImplicitDynamics::new(32, 32, config).unwrap();
+    let dynamics = ImplicitDynamics::new(weights, config);
 
     let context_tokens: Vec<_> = (0..10).map(|_| create_random_vector(32)).collect();
     let query = create_random_vector(32);
@@ -27,8 +45,9 @@ fn benchmark_sequential_updates(c: &mut Criterion) {
 }
 
 fn benchmark_convergence_prediction(c: &mut Criterion) {
+    let weights = create_random_weights(16, 16);
     let config = DynamicsConfig::default();
-    let mut dynamics = ImplicitDynamics::new(16, 16, config).unwrap();
+    let dynamics = ImplicitDynamics::new(weights, config);
 
     let context_tokens: Vec<_> = (0..5).map(|_| create_random_vector(16)).collect();
     let query = create_random_vector(16);

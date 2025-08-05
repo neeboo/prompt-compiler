@@ -3,13 +3,10 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use colored::*;
-use prompt_compiler_core::compiler::analyzers::{ContextLearningAnalyzer, SemanticAnalyzer};
-use prompt_compiler_core::compiler::generators::WeightAwareGenerator;
-use prompt_compiler_core::compiler::optimizers::{
-    PriorityBalanceOptimizer, TokenBudgetOptimizer, WeightUpdateOptimizer,
-};
-use prompt_compiler_core::{ModelTarget, PromptCompiler, PromptIR};
-use prompt_compiler_core::{PromptAnalyzer, PromptGenerator, PromptOptimizer};
+use prompt_compiler_core::compiler::analyzers::SemanticAnalyzer;
+use prompt_compiler_core::compiler::generators::StandardGenerator;
+use prompt_compiler_core::compiler::optimizers::WeightOptimizer;
+use prompt_compiler_core::{ModelTarget, PromptCompiler, PromptAnalyzer, PromptOptimizer};
 use prompt_compiler_weights::{create_random_vector, DynamicsConfig, ImplicitDynamics};
 use serde_json;
 
@@ -39,7 +36,7 @@ pub enum Commands {
         budget: Option<u32>,
 
         /// Priority (1-10)
-        #[arg(short = 'p', long, default_value = "5")]
+        #[arg(long, default_value = "5")]
         priority: u8,
 
         /// Enable weight update analysis
@@ -140,11 +137,8 @@ impl Cli {
         // Create compiler
         let compiler = PromptCompiler::new()
             .add_analyzer(Box::new(SemanticAnalyzer::new()))
-            .add_analyzer(Box::new(ContextLearningAnalyzer::new()))
-            .add_optimizer(Box::new(WeightUpdateOptimizer::new()))
-            .add_optimizer(Box::new(TokenBudgetOptimizer::new()))
-            .add_optimizer(Box::new(PriorityBalanceOptimizer::new()))
-            .add_generator(Box::new(WeightAwareGenerator::new()));
+            .add_optimizer(Box::new(WeightOptimizer::new()?))
+            .add_generator(Box::new(StandardGenerator::new()));
 
         if enable_weight_analysis {
             println!("{}", "📊 Weight update analysis enabled".yellow());
@@ -166,8 +160,8 @@ impl Cli {
             architecture_hints: std::collections::HashMap::new(),
         };
 
-        let generator = WeightAwareGenerator::new();
-        let final_prompt = generator.generate(&compiled.ir, &target)?;
+        let generator = StandardGenerator::new();
+        let final_prompt = compiler.generate(&compiled.ir, &target)?;
 
         // Output results
         match format.as_str() {
@@ -217,10 +211,6 @@ impl Cli {
                 let analyzer = SemanticAnalyzer::new();
                 analyzer.analyze(&prompt)?
             }
-            "context" => {
-                let analyzer = ContextLearningAnalyzer::new();
-                analyzer.analyze(&prompt)?
-            }
             _ => {
                 println!("{}", "❌ Unsupported analyzer type".red());
                 return Ok(());
@@ -256,8 +246,10 @@ impl Cli {
         println!("{}", "⚡ Starting prompt optimization...".cyan().bold());
 
         // Create initial IR
-        let mut ir = PromptIR::new(prompt.clone());
+        let mut ir = prompt_compiler_core::PromptIR::new(prompt.clone());
         ir.token_budget = budget;
+        ir.original_content = prompt.clone();
+        ir.compiled_content = prompt.clone();
 
         // Parse simple context
         let lines: Vec<&str> = prompt.lines().collect();
@@ -269,47 +261,29 @@ impl Cli {
             );
         }
 
-        // Apply optimizers
+        // Apply optimizer
         let optimized_ir = match optimizer_type.as_str() {
-            "weight" => {
-                let optimizer = WeightUpdateOptimizer::new();
+            "weight" | "all" => {
+                let optimizer = WeightOptimizer::new()?;
                 optimizer.optimize(&ir)?
-            }
-            "budget" => {
-                let optimizer = TokenBudgetOptimizer::new();
-                optimizer.optimize(&ir)?
-            }
-            "priority" => {
-                let optimizer = PriorityBalanceOptimizer::new();
-                optimizer.optimize(&ir)?
-            }
-            "all" => {
-                let mut current_ir = ir;
-
-                let weight_optimizer = WeightUpdateOptimizer::new();
-                current_ir = weight_optimizer.optimize(&current_ir)?;
-
-                let budget_optimizer = TokenBudgetOptimizer::new();
-                current_ir = budget_optimizer.optimize(&current_ir)?;
-
-                let priority_optimizer = PriorityBalanceOptimizer::new();
-                priority_optimizer.optimize(&current_ir)?
             }
             _ => {
-                println!("{}", "❌ Unsupported optimizer type".red());
+                println!("{}", "❌ Only 'weight' optimizer is currently supported".red());
                 return Ok(());
             }
         };
 
         println!("\n{}", "✨ Optimization Results:".green().bold());
-        println!("Original intent: {}", prompt.bright_black());
-        println!("Optimized intent: {}", optimized_ir.intent.green());
+        println!("Original: {}", prompt.bright_black());
+        println!("Optimized: {}", optimized_ir.compiled_content.lines().next().unwrap_or(&optimized_ir.compiled_content).green());
 
-        if !optimized_ir.compilation_hints.is_empty() {
-            println!("\n{}", "🔧 Applied optimizations:".blue().bold());
-            for hint in optimized_ir.compilation_hints {
-                println!("• {}", hint.cyan());
-            }
+        // 显示权重分析结果
+        if let Some(convergence) = optimized_ir.compilation_metadata.get("convergence_rate") {
+            println!("📈 Convergence rate: {}", convergence.cyan());
+        }
+
+        if let Some(optimization_info) = optimized_ir.compilation_metadata.get("weight_optimization") {
+            println!("🔧 Optimization strategy: {}", optimization_info.blue());
         }
 
         Ok(())

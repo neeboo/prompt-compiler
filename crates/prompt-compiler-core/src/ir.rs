@@ -21,6 +21,11 @@ pub struct PromptIR {
     
     // Analysis metadata
     pub analysis_metadata: HashMap<String, String>,
+
+    // 新增字段以支持编译流程
+    pub original_content: String,     // 原始 prompt 内容
+    pub compiled_content: String,     // 编译后的 prompt 内容
+    pub compilation_metadata: HashMap<String, String>, // 编译元数据
 }
 
 /// Context entry - Corresponds to context tokens in the paper
@@ -75,6 +80,9 @@ impl PromptIR {
             compilation_hints: Vec::new(),
             metadata: HashMap::new(),
             analysis_metadata: HashMap::new(),
+            original_content: String::new(),
+            compiled_content: String::new(),
+            compilation_metadata: HashMap::new(),
         }
     }
 
