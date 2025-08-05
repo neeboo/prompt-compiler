@@ -30,6 +30,16 @@ logs/
 *.rocksdb/
 data/
 
+# Demo and test databases (auto-generated)
+*_db/
+*_semantic_db/
+enterprise_rocksdb/
+high_performance_db/
+persistent_semantic_db/
+cache_test_db/
+semantic_demo_*
+demo_semantic_*
+
 # Configuration
 config.local.toml
 .env
@@ -59,3 +69,6 @@ criterion/
 # Testing
 test_data/
 *.test
+
+# env setting
+.env

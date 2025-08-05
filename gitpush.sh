@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 一键 Git 提交推送脚本
-# 使用方法: ./git-push.sh [可选的提交消息]
+# 使用方法: ./gitpush.sh [可选的提交消息]
 
 # 默认提交消息
 DEFAULT_MESSAGE="自动提交：$(date '+%Y-%m-%d %H:%M:%S')"

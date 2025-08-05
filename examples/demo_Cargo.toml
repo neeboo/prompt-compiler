@@ -1,0 +1,14 @@
+[package]
+name = "industry_demo"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "industry_demo"
+path = "industry_embedding_demo.rs"
+
+[dependencies]
+prompt-compiler-storage = { path = "crates/prompt-compiler-storage" }
+prompt-compiler-embeddings = { path = "crates/prompt-compiler-embeddings" }
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
