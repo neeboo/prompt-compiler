@@ -25,12 +25,65 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Install dependencies and build with Honkit (GitBook alternative)
+    - name: Build documentation with Docsify
       run: |
-        npm install -g honkit
+        # 安装 docsify-cli，一个现代化的文档工具
+        npm install -g docsify-cli
+        
+        # 创建 docsify 配置
         cd docs
-        # 使用 Honkit 替代 GitBook CLI（现代化的 GitBook 替代品）
-        honkit build
+        
+        # 创建 index.html 文件
+        cat > index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <title>Prompt Compiler Documentation</title>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+          <meta name="description" content="A state-of-the-art AI prompt compiler based on ICL weight update dynamics">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+          <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+        </head>
+        <body>
+          <div id="app"></div>
+          <script>
+            window.$docsify = {
+              name: 'Prompt Compiler',
+              repo: 'https://github.com/neeboo/prompt-compiler',
+              loadSidebar: true,
+              subMaxLevel: 2,
+              search: 'auto',
+              copyCode: {
+                buttonText : 'Copy to clipboard',
+                errorText  : 'Error',
+                successText: 'Copied'
+              }
+            }
+          </script>
+          <!-- Docsify v4 -->
+          <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+          <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+          <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+          <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-rust.min.js"></script>
+          <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+        </body>
+        </html>
+        EOF
+        
+        # 创建 _sidebar.md 文件（基于 SUMMARY.md）
+        cat > _sidebar.md << 'EOF'
+        * [Home](/)
+        * [Configuration Guide](configuration.md)
+        * **Use Cases & Integration**
+          * [Real-World Integration Guide](use_cases/real_world_integration_guide.md)
+          * [Multi-Agent Context Sharing](use_cases/multi_agent_sharing.md)
+        * **Language Versions**
+          * [实际集成指南](use_cases/real_world_integration_guide.cn.md)
+          * [多Agent上下文共享](use_cases/multi_agent_sharing.cn.md)
+        * [Performance Benchmarks](../benches/README.md)
+        * [Examples](../examples/README.md)
+        EOF
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -38,7 +91,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: ./docs/_book
+        path: ./docs
 
     - name: Deploy to GitHub Pages
       id: deployment
