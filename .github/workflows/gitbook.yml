@@ -24,11 +24,15 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '16'  # 使用Node.js 16，GitBook CLI在这个版本上工作正常
 
     - name: Install GitBook CLI
       run: |
-        npm install -g gitbook-cli
+        # 修复graceful-fs兼容性问题
+        npm install -g gitbook-cli --force
+        # 安装特定版本的graceful-fs
+        cd $(npm root -g)/gitbook-cli
+        npm install graceful-fs@4.2.0 --save
         gitbook --version
 
     - name: Install GitBook plugins
