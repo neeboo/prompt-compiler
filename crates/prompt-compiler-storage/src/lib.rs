@@ -14,10 +14,16 @@ pub enum StorageError {
     
     #[error("Serialization error: {0}")]
     SerializationError(#[from] serde_json::Error),
-    
+
+    #[error("Bincode error: {0}")]
+    BincodeError(#[from] bincode::Error),
+
     #[error("Crypto error: {0}")]
     CryptoError(#[from] prompt_compiler_crypto::CryptoError),
     
+    #[error("Column family not found: {0}")]
+    ColumnFamilyNotFound(String),
+
     #[error("Entry not found: {0}")]
     NotFound(String),
     

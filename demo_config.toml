@@ -1,0 +1,4 @@
+[[bin]]
+name = "semantic_demo"
+path = "examples/semantic_compression_demo.rs"
+

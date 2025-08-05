@@ -6,7 +6,8 @@ members = [
     "crates/prompt-compiler-crypto",
     "crates/prompt-compiler-weights",
     "crates/prompt-compiler-web",
-    "crates/prompt-compiler-sdk"
+    "crates/prompt-compiler-sdk",
+    "crates/prompt-analyzer"
 ]
 resolver = "2"
 
@@ -72,3 +73,4 @@ prompt-compiler-crypto = { path = "crates/prompt-compiler-crypto" }
 prompt-compiler-weights = { path = "crates/prompt-compiler-weights" }
 prompt-compiler-web = { path = "crates/prompt-compiler-web" }
 prompt-compiler-sdk = { path = "crates/prompt-compiler-sdk" }
+prompt-analyzer = { path = "crates/prompt-analyzer" }

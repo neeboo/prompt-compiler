@@ -1,0 +1,18 @@
+[package]
+name = "prompt-analyzer"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "prompt_analyzer"
+path = "src/bin/main.rs"
+
+[dependencies]
+prompt-compiler-weights = { path = "../prompt-compiler-weights" }
+prompt-compiler-storage = { path = "../prompt-compiler-storage" }
+nalgebra = "0.32"
+clap = { version = "4.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rocksdb = "0.21"
+plotters = "0.3"
