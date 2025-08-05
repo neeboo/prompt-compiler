@@ -1,11 +1,11 @@
 //! Compiler module - Core compilation logic and traits
 
 pub mod analyzers;
-pub mod optimizers; 
 pub mod generators;
+pub mod optimizers;
 
+use crate::error::Result;
 pub use crate::ir::*;
-use crate::error::{Result, PromptCompilerError};
 use std::collections::HashMap;
 
 /// Main prompt compiler structure
@@ -31,7 +31,7 @@ pub trait PromptGenerator {
 }
 
 /// Analysis result
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AnalysisResult {
     pub intent_clarity: f32,
     pub context_relevance: f32,
@@ -80,11 +80,11 @@ impl PromptCompiler {
     pub fn compile(&self, prompt: &str) -> Result<CompiledState> {
         // 1. Analysis phase
         let mut ir = self.parse_to_ir(prompt)?;
-        
+
         for analyzer in &self.analyzers {
             let analysis = analyzer.analyze(prompt)?;
-            ir.analysis_metadata.insert("analysis".to_string(), 
-                serde_json::to_string(&analysis)?);
+            ir.analysis_metadata
+                .insert("analysis".to_string(), serde_json::to_string(&analysis)?);
         }
 
         // 2. Optimization phase
@@ -97,7 +97,8 @@ impl PromptCompiler {
             version: env!("CARGO_PKG_VERSION").to_string(),
             ir,
             created_at: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)?.as_secs(),
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_secs(),
             compilation_metadata: self.generate_metadata(),
         };
 
@@ -108,12 +109,14 @@ impl PromptCompiler {
     fn parse_to_ir(&self, prompt: &str) -> Result<PromptIR> {
         // Simple parsing logic - would be more complex in actual implementation
         let lines: Vec<&str> = prompt.lines().collect();
-        
-        let intent = lines.first()
+
+        let intent = lines
+            .first()
             .map(|s| s.to_string())
             .unwrap_or_else(|| "Unspecified intent".to_string());
 
-        let context = lines.iter()
+        let context = lines
+            .iter()
             .skip(1)
             .enumerate()
             .map(|(i, &line)| ContextEntry {
@@ -121,7 +124,8 @@ impl PromptCompiler {
                 importance: 1.0 / (i + 1) as f32, // Decreasing importance
                 timestamp: std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap().as_secs(),
+                    .unwrap()
+                    .as_secs(),
                 source: "user_input".to_string(),
             })
             .collect();
@@ -143,10 +147,22 @@ impl PromptCompiler {
     /// Generate compilation metadata
     fn generate_metadata(&self) -> HashMap<String, String> {
         let mut metadata = HashMap::new();
-        metadata.insert("compiler_version".to_string(), env!("CARGO_PKG_VERSION").to_string());
-        metadata.insert("analyzers_count".to_string(), self.analyzers.len().to_string());
-        metadata.insert("optimizers_count".to_string(), self.optimizers.len().to_string());
-        metadata.insert("generators_count".to_string(), self.generators.len().to_string());
+        metadata.insert(
+            "compiler_version".to_string(),
+            env!("CARGO_PKG_VERSION").to_string(),
+        );
+        metadata.insert(
+            "analyzers_count".to_string(),
+            self.analyzers.len().to_string(),
+        );
+        metadata.insert(
+            "optimizers_count".to_string(),
+            self.optimizers.len().to_string(),
+        );
+        metadata.insert(
+            "generators_count".to_string(),
+            self.generators.len().to_string(),
+        );
         metadata
     }
 }

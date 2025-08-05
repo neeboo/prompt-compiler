@@ -224,10 +224,10 @@ fn analyze_context_coherence(lines: &[&str]) -> f32 {
     let coherence_scores: Vec<f32> = lines
         .windows(2)
         .map(|window| {
-            let words1: std::collections::HashSet<&str> =
-                window[0].to_lowercase().split_whitespace().collect();
-            let words2: std::collections::HashSet<&str> =
-                window[1].to_lowercase().split_whitespace().collect();
+            let line1_lower = window[0].to_lowercase();
+            let line2_lower = window[1].to_lowercase();
+            let words1: std::collections::HashSet<&str> = line1_lower.split_whitespace().collect();
+            let words2: std::collections::HashSet<&str> = line2_lower.split_whitespace().collect();
 
             if words1.is_empty() || words2.is_empty() {
                 return 0.0;

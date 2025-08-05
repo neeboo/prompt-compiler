@@ -9,7 +9,6 @@ pub mod ir;
 
 pub use compiler::*;
 pub use error::*;
-pub use ir::*;
 
 /// Version information for the core library
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

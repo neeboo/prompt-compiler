@@ -90,14 +90,53 @@ impl Signature {
     }
 }
 
-/// Generate new signing key
+/// Generate new signing key using proper random bytes
 pub fn generate_signing_key() -> SigningKey {
-    use rand::rngs::OsRng;
-    SigningKey::generate(&mut OsRng)
+    use rand::RngCore;
+    let mut csprng = rand::rngs::OsRng;
+    let mut secret_bytes = [0u8; 32];
+    csprng.fill_bytes(&mut secret_bytes);
+    SigningKey::from_bytes(&secret_bytes)
 }
 
 impl std::fmt::Display for Hash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hash_creation() {
+        let data = b"hello world";
+        let hash = Hash::from_data(data);
+        assert!(!hash.as_str().is_empty());
+        assert_eq!(hash.as_str().len(), 64); // SHA256 hex = 64 chars
+    }
+
+    #[test]
+    fn test_signature_roundtrip() {
+        let signing_key = generate_signing_key();
+        let data = b"test message";
+
+        let signature = Signature::sign(data, &signing_key);
+        let is_valid = signature.verify(data).unwrap();
+
+        assert!(is_valid);
+
+        // Test with different data
+        let wrong_data = b"wrong message";
+        let is_invalid = signature.verify(wrong_data).unwrap();
+        assert!(!is_invalid);
+    }
+
+    #[test]
+    fn test_hash_short() {
+        let hash = Hash::from_string("test");
+        let short = hash.short();
+        assert_eq!(short.len(), 8);
     }
 }

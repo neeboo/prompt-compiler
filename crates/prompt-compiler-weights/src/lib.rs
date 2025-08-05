@@ -33,6 +33,23 @@ pub struct WeightUpdate {
     pub step_size: f32,
 }
 
+impl WeightUpdate {
+    /// Calculate effectiveness score based on update magnitude and stability
+    pub fn effectiveness_score(&self) -> f32 {
+        let update_norm = self.delta_w.norm();
+        let context_norm = self.context_vector.norm();
+        let query_norm = self.query_vector.norm();
+
+        // Effectiveness is proportional to update magnitude but inversely to input magnitude
+        // This prevents large inputs from dominating the score
+        if context_norm > 0.0 && query_norm > 0.0 {
+            update_norm / (context_norm * query_norm).sqrt()
+        } else {
+            0.0
+        }
+    }
+}
+
 /// Configuration for dynamics computation
 #[derive(Debug, Clone)]
 pub struct DynamicsConfig {
@@ -208,6 +225,59 @@ impl ImplicitDynamics {
         }
 
         Err(WeightError::ConvergenceFailed { max_iterations })
+    }
+
+    /// Compute sequential weight updates for a series of context-query pairs
+    ///
+    /// # Arguments
+    /// * `contexts` - Sequence of context vectors
+    /// * `query` - Single query vector to use for all updates
+    ///
+    /// # Returns
+    /// Vector of weight updates computed sequentially
+    pub fn compute_sequential_updates(&mut self, contexts: &[DVector<f32>], query: &DVector<f32>) -> Result<Vec<WeightUpdate>, WeightError> {
+        let mut updates = Vec::new();
+
+        for context in contexts {
+            let update = self.update_step(context, query)?;
+            updates.push(update);
+        }
+
+        Ok(updates)
+    }
+
+    /// Predict convergence based on a sequence of updates
+    ///
+    /// # Arguments
+    /// * `updates` - Sequence of weight updates to analyze
+    ///
+    /// # Returns
+    /// Convergence metrics prediction
+    pub fn predict_convergence(&self, updates: &[WeightUpdate]) -> ConvergenceMetrics {
+        let gradient_norms: Vec<f32> = updates
+            .iter()
+            .map(|update| update.delta_w.norm())
+            .collect();
+
+        let convergence_rate = if gradient_norms.len() > 3 {
+            let recent_avg = gradient_norms.iter().rev().take(2).sum::<f32>() / 2.0;
+            let early_avg = gradient_norms.iter().take(2).sum::<f32>() / 2.0;
+            if early_avg > 0.0 {
+                (early_avg - recent_avg) / early_avg
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        };
+
+        let is_converged = gradient_norms.last().unwrap_or(&1.0) < &0.01;
+
+        ConvergenceMetrics {
+            gradient_norms,
+            convergence_rate,
+            is_converged,
+        }
     }
 
     /// Get current weights matrix
