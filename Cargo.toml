@@ -49,6 +49,10 @@ axum = "0.7"
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "fs"] }
 
+# OpenAPI support
+utoipa = { version = "5.4.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
+
 # Additional dependencies for RocksDB system
 uuid = { version = "1.0", features = ["v4"] }
 md5 = "0.7"

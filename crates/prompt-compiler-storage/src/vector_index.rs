@@ -1,13 +1,13 @@
 use anyhow::Result;
 
-/// 向量索引接口
+/// Vector index interface
 pub trait VectorIndex {
     fn add_vector(&mut self, id: String, vector: Vec<f32>) -> Result<()>;
     fn search(&self, query: &[f32], top_k: usize, threshold: f32) -> Result<Vec<(String, f32)>>;
     fn remove(&mut self, id: &str) -> Result<()>;
 }
 
-/// HNSW (Hierarchical Navigable Small World) 索引实现
+/// HNSW (Hierarchical Navigable Small World) index implementation
 pub struct HNSWIndex {
     vectors: std::collections::HashMap<String, Vec<f32>>,
     dimension: usize,

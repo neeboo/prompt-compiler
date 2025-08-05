@@ -6,12 +6,12 @@ use rocksdb::{ColumnFamilyDescriptor, Options, DB};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// 语义压缩的上下文片段
+/// Semantic chunk for context compression
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SemanticChunk {
     pub id: String,
-    pub content_hash: String, // 改为String类型避免Hash类型问题
-    pub compressed_embedding: Vec<f32>, // 压缩后的语义表示
+    pub content_hash: String, // Changed to String type to avoid Hash type issues
+    pub compressed_embedding: Vec<f32>, // Compressed semantic representation
     pub original_size: usize,
     pub compressed_size: usize,
     pub compression_ratio: f32,
@@ -20,14 +20,14 @@ pub struct SemanticChunk {
     pub semantic_tags: Vec<String>,
 }
 
-/// 上下文注入策略
+/// Context injection strategy
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ContextInjectionStrategy {
-    /// 直接发送给LLM
+    /// Send directly to LLM
     DirectSend { max_tokens: usize },
-    /// 注入到语义空间
+    /// Inject into semantic space
     SemanticInject { similarity_threshold: f32 },
-    /// 混合策略
+    /// Hybrid strategy
     Hybrid {
         direct_ratio: f32,
         semantic_ratio: f32
@@ -41,9 +41,9 @@ pub struct StoredState {
     pub content: Vec<u8>,
     pub created_at: u64,
     pub metadata: HashMap<String, String>,
-    /// 关联的语义块ID
+    /// Associated semantic chunk IDs
     pub semantic_chunks: Vec<String>,
-    /// 注入策略
+    /// Injection strategy
     pub injection_strategy: ContextInjectionStrategy,
 }
 
@@ -63,7 +63,7 @@ pub struct CompilationStats {
     pub avg_weight_updates_per_prompt: f32,
     pub most_common_targets: Vec<String>,
     pub convergence_rate: f32,
-    /// 语义压缩统计
+    /// Semantic compression statistics
     pub semantic_compression_ratio: f32,
     pub avg_chunk_reuse_rate: f32,
     pub context_injection_success_rate: f32,
@@ -97,7 +97,7 @@ impl StateDB {
         Ok(StateDB { db, cf_handles })
     }
 
-    /// 存储语义块
+    /// Store semantic chunk
     pub fn store_semantic_chunk(&self, chunk: &SemanticChunk) -> Result<()> {
         let cf = self.db.cf_handle("semantic_chunks")
             .ok_or_else(|| StorageError::ColumnFamilyNotFound("semantic_chunks".to_string()))?;
@@ -106,12 +106,12 @@ impl StateDB {
 
         self.db.put_cf(&cf, &chunk.id, &serialized)?;
 
-        println!("📦 存储语义块: {} (压缩比: {:.2}%)",
+        println!("📦 Stored semantic chunk: {} (compression ratio: {:.2}%)",
                 chunk.id, chunk.compression_ratio * 100.0);
         Ok(())
     }
 
-    /// 根据语义相似度检索上下文
+    /// Retrieve by semantic similarity
     pub fn retrieve_by_semantic_similarity(
         &self,
         query_embedding: &[f32],
@@ -128,7 +128,7 @@ impl StateDB {
             let (_, value) = item?;
             let chunk: SemanticChunk = bincode::deserialize(&value)?;
 
-            // 计算余弦相似度
+            // Calculate cosine similarity
             let similarity = Self::cosine_similarity(query_embedding, &chunk.compressed_embedding);
 
             if similarity >= threshold {
@@ -136,14 +136,14 @@ impl StateDB {
             }
         }
 
-        // 按相似度排序并限制结果数量
+        // Sort by similarity and limit results
         results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
         results.truncate(limit);
 
         Ok(results.into_iter().map(|(chunk, _)| chunk).collect())
     }
 
-    /// 实施上下文注入策略
+    /// Implement context injection strategy
     pub fn inject_context(
         &self,
         base_prompt: &str,
@@ -152,15 +152,15 @@ impl StateDB {
     ) -> Result<String> {
         match strategy {
             ContextInjectionStrategy::DirectSend { max_tokens } => {
-                // 直接拼接到prompt中
+                // Directly append to prompt
                 let chunks = self.retrieve_by_semantic_similarity(query_embedding, 0.7, 5)?;
                 let context = self.compile_context_for_direct_send(&chunks, *max_tokens)?;
-                Ok(format!("{}\n\n# 相关上下文:\n{}\n\n# 查询:\n{}",
+                Ok(format!("{}\n\n# Related Context:\n{}\n\n# Query:\n{}",
                           context, self.format_chunks_for_llm(&chunks), base_prompt))
             },
 
             ContextInjectionStrategy::SemanticInject { similarity_threshold } => {
-                // 注入到语义空间（模拟）
+                // Inject into semantic space (simulated)
                 let chunks = self.retrieve_by_semantic_similarity(
                     query_embedding,
                     *similarity_threshold,
@@ -168,12 +168,12 @@ impl StateDB {
                 )?;
 
                 let semantic_context = self.create_semantic_injection(&chunks)?;
-                Ok(format!("{}⚡语义注入: {} 个相关块⚡\n{}",
+                Ok(format!("{}⚡Semantic injection: {} related chunks⚡\n{}",
                           semantic_context, chunks.len(), base_prompt))
             },
 
             ContextInjectionStrategy::Hybrid { direct_ratio, semantic_ratio: _ } => {
-                // 混合策略
+                // Hybrid strategy
                 let chunks = self.retrieve_by_semantic_similarity(query_embedding, 0.6, 8)?;
                 let direct_count = (chunks.len() as f32 * direct_ratio) as usize;
 
@@ -183,13 +183,13 @@ impl StateDB {
                 let direct_context = self.format_chunks_for_llm(direct_chunks);
                 let semantic_injection = self.create_semantic_injection(semantic_chunks)?;
 
-                Ok(format!("{}🔀混合注入🔀\n# 直接上下文:\n{}\n\n# 查询:\n{}",
+                Ok(format!("{}🔀Hybrid injection🔀\n# Direct context:\n{}\n\n# Query:\n{}",
                           semantic_injection, direct_context, base_prompt))
             }
         }
     }
 
-    /// 压缩并存储新的上下文
+    /// Compress and store new context
     pub fn compress_and_store_context(
         &self,
         content: &str,
@@ -197,13 +197,13 @@ impl StateDB {
     ) -> Result<SemanticChunk> {
         let original_size = content.len();
 
-        // 简单的压缩模拟（在实际应用中会使用更复杂的语义压缩）
+        // Simple compression simulation (actual implementation would use more complex semantic compression)
         let compressed_embedding = Self::compress_embedding(&embedding, 128)?;
         let compressed_size = compressed_embedding.len() * 4; // f32 = 4 bytes
 
         let chunk = SemanticChunk {
             id: format!("chunk_{}", chrono::Utc::now().timestamp_millis()),
-            content_hash: format!("{:x}", md5::compute(content.as_bytes())), // 使用md5作为简单hash
+            content_hash: format!("{:x}", md5::compute(content.as_bytes())), // Use md5 as simple hash
             compressed_embedding,
             original_size,
             compressed_size,
@@ -217,7 +217,7 @@ impl StateDB {
         Ok(chunk)
     }
 
-    /// 更新编译统计
+    /// Update compilation statistics
     pub fn update_compilation_stats(&self, stats: &CompilationStats) -> Result<()> {
         let cf = self.db.cf_handle("stats")
             .ok_or_else(|| StorageError::ColumnFamilyNotFound("stats".to_string()))?;
@@ -226,13 +226,13 @@ impl StateDB {
 
         self.db.put_cf(&cf, b"compilation_stats", &serialized)?;
 
-        println!("📊 更新编译统计: 收敛率 {:.2}%, 压缩比 {:.2}%",
+        println!("📊 Updated compilation stats: convergence rate {:.2}%, compression ratio {:.2}%",
                 stats.convergence_rate * 100.0,
                 stats.semantic_compression_ratio * 100.0);
         Ok(())
     }
 
-    /// 存储编译状态（为SDK兼容性添加）
+    /// Store compiled state (added for SDK compatibility)
     pub fn store_state(&self, hash: &str, state: &StoredState) -> Result<()> {
         let cf = self.db.cf_handle("states")
             .ok_or_else(|| StorageError::ColumnFamilyNotFound("states".to_string()))?;
@@ -240,11 +240,11 @@ impl StateDB {
         let serialized = bincode::serialize(state)?;
         self.db.put_cf(&cf, hash.as_bytes(), &serialized)?;
 
-        println!("💾 存储编译状态: {}", hash);
+        println!("💾 Stored compiled state: {}", hash);
         Ok(())
     }
 
-    /// 列出所有哈希值（为SDK兼容性添加）
+    /// List all hash values (added for SDK compatibility)
     pub fn list_all_hashes(&self) -> Result<Vec<String>> {
         let cf = self.db.cf_handle("states")
             .ok_or_else(|| StorageError::ColumnFamilyNotFound("states".to_string()))?;
@@ -262,7 +262,7 @@ impl StateDB {
         Ok(hashes)
     }
 
-    // 辅助方法
+    // Helper methods
     fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
         let dot_product: f32 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
         let norm_a: f32 = a.iter().map(|x| x * x).sum::<f32>().sqrt();
@@ -276,7 +276,7 @@ impl StateDB {
     }
 
     fn compress_embedding(embedding: &[f32], target_dim: usize) -> Result<Vec<f32>> {
-        // 简单的维度压缩（PCA的简化版本）
+        // Simple dimension compression (simplified version of PCA)
         if embedding.len() <= target_dim {
             return Ok(embedding.to_vec());
         }
@@ -291,7 +291,7 @@ impl StateDB {
     }
 
     fn extract_semantic_tags(content: &str) -> Vec<String> {
-        // 简单的关键词提取
+        // Simple keyword extraction
         content
             .split_whitespace()
             .filter(|word| word.len() > 4)
@@ -304,7 +304,7 @@ impl StateDB {
         chunks.iter()
             .enumerate()
             .map(|(i, chunk)| {
-                format!("## 上下文片段 {}\n标签: {:?}\n使用次数: {}\n",
+                format!("## Context Fragment {}\nTags: {:?}\nUsage count: {}\n",
                        i + 1, chunk.semantic_tags, chunk.access_count)
             })
             .collect::<Vec<_>>()
@@ -316,7 +316,7 @@ impl StateDB {
             .map(|c| c.compression_ratio)
             .sum::<f32>() / chunks.len() as f32;
 
-        Ok(format!("🧠[语义空间注入: {} 块, 平均压缩比 {:.1}%]",
+        Ok(format!("🧠[Semantic space injection: {} chunks, avg compression ratio {:.1}%]",
                   chunks.len(), total_compression * 100.0))
     }
 
@@ -325,7 +325,7 @@ impl StateDB {
         let mut token_count = 0;
 
         for chunk in chunks {
-            let chunk_info = format!("压缩比: {:.1}% | 标签: {:?}",
+            let chunk_info = format!("Compression ratio: {:.1}% | Tags: {:?}",
                                    chunk.compression_ratio * 100.0,
                                    chunk.semantic_tags);
 

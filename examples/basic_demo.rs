@@ -1,6 +1,6 @@
-//! # 完整实证演示
+//! # Complete Empirical Demonstration
 //!
-//! 展示 Prompt Compiler 如何通过权重动态理论改善 prompt 效果
+//! Demonstrates how Prompt Compiler improves prompt effectiveness through weight dynamics theory
 
 use prompt_compiler_core::{
     PromptCompiler, ModelTarget,
@@ -11,75 +11,75 @@ use prompt_compiler_core::{
 use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("🧠 Prompt Compiler 完整实证演示");
-    println!("基于论文: Learning without training: The implicit dynamics of in-context learning");
+    println!("🧠 Prompt Compiler Complete Empirical Demonstration");
+    println!("Based on paper: Learning without training: The implicit dynamics of in-context learning");
     println!("{}", "=".repeat(80));
 
-    // 1. 构建完整的编译器流水线
+    // 1. Build complete compiler pipeline
     let compiler = PromptCompiler::new()
         .add_analyzer(Box::new(SemanticAnalyzer::new()))
         .add_optimizer(Box::new(WeightOptimizer::new()?))
         .add_generator(Box::new(StandardGenerator::new()));
 
-    // 2. 测试用例：从简单到复杂
+    // 2. Test cases: from simple to complex
     let test_cases = vec![
-        ("简单指令", "写代码"),
-        ("中等复杂度", "帮我写一个排序算法"),
-        ("复杂需求", "设计一个高性能的分布式缓存系统，要求支持数据一致性和故障恢复"),
+        ("Simple Instructions", "write code"),
+        ("Medium Complexity", "help me write a sorting algorithm"),
+        ("Complex Requirements", "design a high-performance distributed cache system that supports data consistency and fault recovery"),
     ];
 
-    println!("\n📊 测试用例对比分析");
+    println!("\n📊 Test Case Comparison Analysis");
     println!("{}", "-".repeat(80));
 
     for (category, original_prompt) in test_cases {
-        println!("\n🔍 测试类别: {}", category);
+        println!("\n🔍 Test Category: {}", category);
 
-        // 编译优化
+        // Compile optimization
         let compiled_state = compiler.compile(original_prompt)?;
         let target = ModelTarget::default();
         let final_output = compiler.generate(&compiled_state.ir, &target)?;
 
-        // 展示结果
+        // Show results
         print_comparison(original_prompt, &final_output, &compiled_state.ir.compilation_metadata);
 
-        // 权重动态分析
+        // Weight dynamics analysis
         if let Some(convergence) = compiled_state.ir.compilation_metadata.get("convergence_rate") {
             let rate: f32 = convergence.parse().unwrap_or(0.0);
-            println!("📈 权重收敛率: {:.3} {}", rate,
-                if rate > 0.8 { "✅ 优秀" }
-                else if rate > 0.6 { "⚠️ 良好" }
-                else { "❌ 需改进" }
+            println!("📈 Weight convergence rate: {:.3} {}", rate,
+                if rate > 0.8 { "✅ Excellent" }
+                else if rate > 0.6 { "⚠️ Good" }
+                else { "❌ Needs improvement" }
             );
         }
     }
 
-    // 3. 性能测试
-    println!("\n⚡ 性能基准测试");
+    // 3. Performance testing
+    println!("\n⚡ Performance Benchmark Testing");
     println!("{}", "-".repeat(80));
     run_performance_test(&compiler)?;
 
-    // 4. 理论验证
-    println!("\n🧮 理论验证：权重动态分析");
+    // 4. Theory verification
+    println!("\n🧮 Theory Verification: Weight Dynamics Analysis");
     println!("{}", "-".repeat(80));
     demonstrate_weight_theory()?;
 
-    println!("\n✅ 实证演示完成！");
-    println!("🎯 结论: Prompt Compiler 通过权重动态理论显著改善了 prompt 质量");
+    println!("\n✅ Empirical demonstration completed!");
+    println!("🎯 Conclusion: Prompt Compiler significantly improves prompt quality through weight dynamics theory");
 
     Ok(())
 }
 
 fn print_comparison(original: &str, compiled: &str, metadata: &HashMap<String, String>) {
-    println!("📝 原始: 「{}」", original);
-    println!("⚡ 优化: 「{}」", compiled.lines().next().unwrap_or(compiled));
+    println!("📝 Original: 「{}」", original);
+    println!("⚡ Optimized: 「{}」", compiled.lines().next().unwrap_or(compiled));
 
     if let Some(optimization_info) = metadata.get("weight_optimization") {
-        println!("🔧 优化策略: {}", optimization_info);
+        println!("🔧 Optimization Strategy: {}", optimization_info);
     }
 
-    // 质量评估
+    // Quality assessment
     let improvement = calculate_improvement_percentage(original, compiled);
-    println!("📊 改善度: {:.1}%", improvement);
+    println!("📊 Improvement: {:.1}%", improvement);
 }
 
 fn calculate_improvement_percentage(original: &str, compiled: &str) -> f32 {
@@ -96,7 +96,7 @@ fn calculate_improvement_percentage(original: &str, compiled: &str) -> f32 {
 fn evaluate_prompt_quality(prompt: &str) -> f32 {
     let mut score = 0.0;
 
-    // 长度评分
+    // Length score
     score += match prompt.len() {
         0..=20 => 10.0,
         21..=100 => 50.0,
@@ -104,13 +104,13 @@ fn evaluate_prompt_quality(prompt: &str) -> f32 {
         _ => 90.0,
     };
 
-    // 结构评分
-    if prompt.contains("##") || prompt.contains("要求") || prompt.contains("格式") {
+    // Structure score
+    if prompt.contains("##") || prompt.contains("requirement") || prompt.contains("format") {
         score += 30.0;
     }
 
-    // 具体性评分
-    if prompt.contains("示例") || prompt.contains("步骤") || prompt.contains("标准") {
+    // Specificity score
+    if prompt.contains("example") || prompt.contains("step") || prompt.contains("standard") {
         score += 20.0;
     }
 
@@ -120,7 +120,7 @@ fn evaluate_prompt_quality(prompt: &str) -> f32 {
 fn run_performance_test(compiler: &PromptCompiler) -> Result<(), Box<dyn std::error::Error>> {
     use std::time::Instant;
 
-    let test_prompt = "创建一个机器学习模型";
+    let test_prompt = "create a machine learning model";
     let iterations = 10;
 
     let start = Instant::now();
@@ -129,31 +129,31 @@ fn run_performance_test(compiler: &PromptCompiler) -> Result<(), Box<dyn std::er
     }
     let duration = start.elapsed();
 
-    println!("🏃 编译速度: {} 次/秒",
+    println!("🏃 Compilation speed: {} times/second",
         (iterations as f64 / duration.as_secs_f64()) as u32);
-    println!("⏱️  平均耗时: {:.2}ms",
+    println!("⏱️  Average time: {:.2}ms",
         duration.as_millis() as f64 / iterations as f64);
 
     Ok(())
 }
 
 fn demonstrate_weight_theory() -> Result<(), Box<dyn std::error::Error>> {
-    // 暂时使用模拟数据来演示权重理论
-    println!("🔬 模拟权重更新过程...");
+    // Temporarily use simulated data to demonstrate weight theory
+    println!("🔬 Simulating weight update process...");
 
-    // 模拟简单和复杂prompt的权重更新
+    // Simulate weight updates for simple and complex prompts
     let simple_convergence = simulate_weight_convergence(1);
     let complex_convergence = simulate_weight_convergence(5);
 
-    println!("📊 理论分析结果:");
-    println!("  简单 prompt 收敛率: {:.3}", simple_convergence);
-    println!("  复杂 prompt 收敛率: {:.3}", complex_convergence);
-    println!("  理论预测: 复杂结构 prompt 应有更好的收敛性");
-    println!("  实际结果: {}",
+    println!("📊 Theoretical Analysis Results:");
+    println!("  Simple prompt convergence rate: {:.3}", simple_convergence);
+    println!("  Complex prompt convergence rate: {:.3}", complex_convergence);
+    println!("  Theory prediction: Complex structure prompts should have better convergence");
+    println!("  Actual results: {}",
         if complex_convergence > simple_convergence {
-            "✅ 符合理论预期"
+            "✅ Consistent with theoretical expectations"
         } else {
-            "⚠️ 需要进一步优化"
+            "⚠️ Needs further optimization"
         }
     );
 
@@ -161,7 +161,7 @@ fn demonstrate_weight_theory() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn simulate_weight_convergence(context_length: usize) -> f32 {
-    // 基于理论公式的简化模拟
+    // Simplified simulation based on theoretical formula
     let base_rate = 0.7_f32;
     let complexity_factor = (context_length as f32).ln() / 10.0;
     (base_rate + complexity_factor).min(0.95)
@@ -172,7 +172,7 @@ fn calculate_convergence_rate(values: &[f32]) -> f32 {
         return 0.0;
     }
 
-    // 计算变化率的平均值
+    // Calculate the average change rate
     let mut changes = Vec::new();
     for i in 1..values.len() {
         changes.push((values[i] - values[i-1]).abs());
@@ -196,13 +196,13 @@ mod tests {
 
     #[test]
     fn test_prompt_quality_evaluation() {
-        let short_prompt = "做这个";
+        let short_prompt = "do this";
         let good_prompt = r#"
-## 任务
-请完成这个任务，遵循以下指导原则:
-- 使用清晰的结构
-- 包含示例
-- 遵循最佳实践
+## Task
+Please complete this task, following these guidelines:
+- Use clear structure
+- Include examples
+- Follow best practices
 "#;
 
         let short_score = evaluate_prompt_quality(short_prompt);

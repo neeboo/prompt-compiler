@@ -34,7 +34,7 @@ impl SequentialPromptAnalyzer {
         })
     }
 
-    /// 执行迭代式 prompt 优化分析
+    /// Execute iterative prompt optimization analysis
     pub fn optimize_iteratively(
         &mut self,
         original_prompt: &str,
@@ -45,19 +45,19 @@ impl SequentialPromptAnalyzer {
         let mut current_prompt = original_prompt.to_string();
         let mut all_updates = Vec::new();
 
-        println!("🚀 开始迭代式 Prompt 优化分析");
-        println!("原始任务: {}", task);
-        println!("原始 Prompt: {}", original_prompt);
+        println!("🚀 Starting iterative Prompt optimization analysis");
+        println!("Original task: {}", task);
+        println!("Original Prompt: {}", original_prompt);
         println!("{}", "=".repeat(60));
 
         for step in 0..max_steps {
-            // 分析当前 prompt
+            // Analyze current prompt
             let analysis = self.analyzer.analyze_single_prompt(&current_prompt, task)?;
 
-            // 生成改进建议
+            // Generate improvement suggestions
             let suggestions = self.generate_improvement_suggestions(&current_prompt, &analysis);
 
-            // 记录这一步
+            // Record this step
             let step_data = OptimizationStep {
                 step_number: step + 1,
                 prompt: current_prompt.clone(),
@@ -66,46 +66,46 @@ impl SequentialPromptAnalyzer {
             };
             steps.push(step_data);
 
-            // 打印当前步骤结果
-            println!("\n📊 第 {} 步分析结果:", step + 1);
-            println!("当前 Prompt: {}", current_prompt);
-            println!("效果得分: {:.4}", analysis.effectiveness_score);
-            println!("更新幅度: {:.4}", analysis.update_magnitude);
-            println!("是否稳定: {}", if analysis.is_stable { "✅" } else { "❌" });
+            // Print current step results
+            println!("\n📊 Step {} analysis results:", step + 1);
+            println!("Current Prompt: {}", current_prompt);
+            println!("Effectiveness Score: {:.4}", analysis.effectiveness_score);
+            println!("Update Magnitude: {:.4}", analysis.update_magnitude);
+            println!("Is Stable: {}", if analysis.is_stable { "✅" } else { "❌" });
 
-            // 收集权重更新用于收敛分析
+            // Collect weight updates for convergence analysis
             let context = self.encoder.encode_prompt(&current_prompt);
             let query = self.encoder.encode_task(task);
             let update = self.analyzer.dynamics.update_step(&context, &query)?;
             all_updates.push(update);
 
-            // 如果已经收敛，提前结束
+            // If already converged, end early
             if analysis.is_stable && step > 2 {
-                println!("✅ 已达到稳定状态，提前结束优化");
+                println!("✅ Converged to a stable state, ending optimization early");
                 break;
             }
 
-            // 应用改进建议生成下一个 prompt
+            // Apply improvement suggestions to generate the next prompt
             if step < max_steps - 1 {
                 current_prompt = self.apply_improvements(&current_prompt, &suggestions);
-                println!("📝 改进建议: {:?}", suggestions);
-                println!("🔄 下一步 Prompt: {}", current_prompt);
+                println!("📝 Improvement suggestions: {:?}", suggestions);
+                println!("🔄 Next Prompt: {}", current_prompt);
             }
         }
 
-        // 计算最终收敛率
+        // Calculate final convergence rate
         let convergence_metrics = self.analyzer.dynamics.predict_convergence(&all_updates);
         let final_convergence_rate = convergence_metrics.convergence_rate;
 
-        // 计算总体改进
+        // Calculate total improvement
         let initial_score = steps.first().map(|s| s.analysis.effectiveness_score).unwrap_or(0.0);
         let final_score = steps.last().map(|s| s.analysis.effectiveness_score).unwrap_or(0.0);
         let total_improvement = ((final_score - initial_score) / initial_score.max(0.001)) * 100.0;
 
-        println!("\n🎯 优化总结:");
-        println!("最终收敛率: {:.4}", final_convergence_rate);
-        println!("总体改进: {:.1}%", total_improvement);
-        println!("梯度历史: {:?}", convergence_metrics.gradient_norms);
+        println!("\n🎯 Optimization Summary:");
+        println!("Final Convergence Rate: {:.4}", final_convergence_rate);
+        println!("Total Improvement: {:.1}%", total_improvement);
+        println!("Gradient History: {:?}", convergence_metrics.gradient_norms);
 
         Ok(OptimizationHistory {
             original_prompt: original_prompt.to_string(),
@@ -116,55 +116,55 @@ impl SequentialPromptAnalyzer {
         })
     }
 
-    /// 生成改进建议
+    /// Generate improvement suggestions
     fn generate_improvement_suggestions(&self, prompt: &str, analysis: &PromptAnalysis) -> Vec<String> {
         let mut suggestions = Vec::new();
 
-        // 基于效果得分给出建议
+        // Suggestions based on effectiveness score
         if analysis.effectiveness_score < 0.3 {
-            suggestions.push("添加更明确的指令结构".to_string());
-            suggestions.push("使用\"请按照以下步骤\"等引导词".to_string());
+            suggestions.push("Add a clearer instruction structure".to_string());
+            suggestions.push("Use guiding words like 'Please follow these steps'".to_string());
         }
 
-        // 基于更新幅度给出建议
+        // Suggestions based on update magnitude
         if analysis.update_magnitude > 1.0 {
-            suggestions.push("简化prompt，避免过于复杂".to_string());
+            suggestions.push("Simplify the prompt, avoid excessive complexity".to_string());
         }
 
-        // 检查prompt中缺失的关键元素
-        if !prompt.contains("请") && !prompt.contains("麻烦") {
-            suggestions.push("添加礼貌用语增强引导性".to_string());
+        // Check for missing key elements in the prompt
+        if !prompt.contains("please") && !prompt.contains("could you") {
+            suggestions.push("Add polite language to enhance guidance".to_string());
         }
 
-        if !prompt.contains("详细") && !prompt.contains("具体") {
-            suggestions.push("添加\"详细\"或\"具体\"要求明确性".to_string());
+        if !prompt.contains("detailed") && !prompt.contains("specific") {
+            suggestions.push("Add 'detailed' or 'specific' requirements for clarity".to_string());
         }
 
-        if !prompt.contains("步骤") && !prompt.contains("按照") {
-            suggestions.push("添加步骤化指令提高结构性".to_string());
+        if !prompt.contains("steps") && !prompt.contains("follow") {
+            suggestions.push("Add step-by-step instructions to improve structure".to_string());
         }
 
-        // 如果没有其他建议，给出通用建议
+        // If no other suggestions, provide general advice
         if suggestions.is_empty() {
-            suggestions.push("当前prompt已经比较优秀".to_string());
+            suggestions.push("The current prompt is already quite good".to_string());
         }
 
         suggestions
     }
 
-    /// 应用改进建议
+    /// Apply improvement suggestions
     fn apply_improvements(&self, original: &str, suggestions: &[String]) -> String {
         let mut improved = original.to_string();
 
         for suggestion in suggestions {
-            if suggestion.contains("请按照以下步骤") && !improved.contains("步骤") {
-                improved = format!("请按照以下步骤{}：1) 理解要求 2) 分析问题 3) 给出结果", improved);
-            } else if suggestion.contains("详细") && !improved.contains("详细") {
-                improved = format!("请详细{}", improved);
-            } else if suggestion.contains("礼貌用语") && !improved.contains("请") {
-                improved = format!("请{}", improved);
-            } else if suggestion.contains("具体") && !improved.contains("具体") {
-                improved = improved.replace("分析", "具体分析");
+            if suggestion.contains("follow these steps") && !improved.contains("steps") {
+                improved = format!("Please follow these steps for {}: 1) Understand requirements 2) Analyze problem 3) Provide results", improved);
+            } else if suggestion.contains("detailed") && !improved.contains("detailed") {
+                improved = format!("Please provide a detailed {}", improved);
+            } else if suggestion.contains("polite language") && !improved.contains("please") {
+                improved = format!("Please {}", improved);
+            } else if suggestion.contains("specific") && !improved.contains("specific") {
+                improved = improved.replace("analysis", "specific analysis");
             }
         }
 

@@ -66,10 +66,10 @@ impl PromptCompilerSDK {
                 content: serde_json::to_vec(&compiled)?,
                 created_at: compiled.created_at,
                 metadata: compiled.compilation_metadata.clone(),
-                semantic_chunks: Vec::new(), // 初始化为空的语义块列表
+                semantic_chunks: Vec::new(), // Initialize as empty semantic chunks list
                 injection_strategy: prompt_compiler_storage::ContextInjectionStrategy::DirectSend {
                     max_tokens: 2048
-                }, // 默认使用直接发送策略
+                }, // Default to direct send strategy
             };
             
             storage_guard.store_state(hash.as_str(), &stored_state)?;

@@ -78,22 +78,22 @@ impl PromptCompiler {
 
     /// Compile prompt to intermediate representation
     pub fn compile(&self, prompt: &str) -> Result<CompiledState> {
-        // 1. 创建初始 IR
+        // 1. Create initial IR
         let mut ir = self.parse_to_ir(prompt)?;
 
-        // 2. 分析阶段
+        // 2. Analysis phase
         for analyzer in &self.analyzers {
             let analysis = analyzer.analyze(prompt)?;
             ir.analysis_metadata
                 .insert("analysis".to_string(), serde_json::to_string(&analysis)?);
         }
 
-        // 3. 优化阶段
+        // 3. Optimization phase
         for optimizer in &self.optimizers {
             ir = optimizer.optimize(&ir)?;
         }
 
-        // 4. 创建编译状态
+        // 4. Create compiled state
         let compiled = CompiledState {
             version: env!("CARGO_PKG_VERSION").to_string(),
             ir,
@@ -106,7 +106,7 @@ impl PromptCompiler {
         Ok(compiled)
     }
 
-    /// 解析 prompt 为 IR
+    /// Parse prompt to IR
     fn parse_to_ir(&self, prompt: &str) -> Result<PromptIR> {
         use std::collections::HashMap;
 
@@ -122,18 +122,18 @@ impl PromptCompiler {
             metadata: HashMap::new(),
             analysis_metadata: HashMap::new(),
             original_content: prompt.to_string(),
-            compiled_content: prompt.to_string(), // 初始状态
+            compiled_content: prompt.to_string(), // Initial state
             compilation_metadata: HashMap::new(),
         })
     }
 
-    /// 生成最终输出
+    /// Generate final output
     pub fn generate(&self, ir: &PromptIR, target: &ModelTarget) -> Result<String> {
         for generator in &self.generators {
             return generator.generate(ir, target);
         }
 
-        // 如果没有生成器，返回编译后的内容
+        // If no generator, return compiled content
         Ok(ir.compiled_content.clone())
     }
 }

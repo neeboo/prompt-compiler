@@ -4,15 +4,15 @@ use std::collections::HashMap;
 use lru::LruCache;
 use std::num::NonZeroUsize;
 
-// 暂时注释掉rust_bert的使用，避免依赖冲突
+// Temporarily comment out rust_bert usage to avoid dependency conflicts
 // use rust_bert::pipelines::sentence_embeddings::{
 //     SentenceEmbeddingsBuilder, SentenceEmbeddingsModel, SentenceEmbeddingsModelType,
 // };
 
-/// 支持的embedding模型类型（基于行业标准）
+/// Supported embedding model types (based on industry standards)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum EmbeddingModel {
-    /// 使用rust-bert的预训练模型 (暂时禁用)
+    /// Using rust-bert pretrained models (temporarily disabled)
     // RustBert {
     //     model_type: RustBertModelType,
     //     device: DeviceType,
@@ -22,11 +22,11 @@ pub enum EmbeddingModel {
         model: String,
         api_key: String,
     },
-    /// 本地Mock模型（用于测试）
+    /// Local Mock model (for testing)
     Mock { dimension: usize },
 }
 
-/// rust-bert支持的模型类型 (保留用于将来)
+/// rust-bert supported model types (reserved for future use)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RustBertModelType {
     /// all-MiniLM-L6-v2 (384维，快速)

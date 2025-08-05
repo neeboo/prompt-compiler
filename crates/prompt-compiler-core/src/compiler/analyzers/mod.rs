@@ -3,7 +3,7 @@
 use crate::compiler::{PromptAnalyzer, AnalysisResult};
 use crate::error::Result;
 
-/// 语义分析器 - 分析 prompt 的语义质量
+/// Semantic Analyzer - Analyzes prompt semantic quality
 pub struct SemanticAnalyzer;
 
 impl SemanticAnalyzer {
@@ -28,18 +28,18 @@ impl PromptAnalyzer for SemanticAnalyzer {
     }
 }
 
-/// 分析意图清晰度
+/// Analyze intent clarity
 fn analyze_intent_clarity(prompt: &str) -> f32 {
     let mut score: f32 = 0.0;
 
-    // 检查动作词汇
+    // Check action words
     let action_words = ["write", "create", "generate", "analyze", "explain", "solve"];
     let has_action = action_words.iter().any(|&word| prompt.to_lowercase().contains(word));
     if has_action {
         score += 0.3;
     }
 
-    // 检查具体性
+    // Check specificity
     if prompt.len() > 20 {
         score += 0.2;
     }
@@ -47,7 +47,7 @@ fn analyze_intent_clarity(prompt: &str) -> f32 {
         score += 0.2;
     }
 
-    // 检查结构
+    // Check structure
     if prompt.contains(":") || prompt.contains("-") {
         score += 0.3;
     }
@@ -55,11 +55,11 @@ fn analyze_intent_clarity(prompt: &str) -> f32 {
     score.min(1.0)
 }
 
-/// 分析上下文相关性
+/// Analyze context relevance
 fn analyze_context_relevance(prompt: &str) -> f32 {
-    let mut score: f32 = 0.4; // 基础分
+    let mut score: f32 = 0.4; // Base score
 
-    // 上下文关键词
+    // Context keywords
     let context_keywords = ["context", "background", "requirements", "constraints"];
     for keyword in context_keywords {
         if prompt.to_lowercase().contains(keyword) {
@@ -70,40 +70,40 @@ fn analyze_context_relevance(prompt: &str) -> f32 {
     score.min(1.0)
 }
 
-/// 检测约束冲突
+/// Detect constraint conflicts
 fn detect_constraint_conflicts(prompt: &str) -> Vec<String> {
     let mut conflicts = Vec::new();
 
-    // 检查长度与详细度的冲突
+    // Check length and detail conflicts
     if prompt.contains("brief") && prompt.contains("detailed") {
-        conflicts.push("长度要求冲突：同时要求简洁和详细".to_string());
+        conflicts.push("Length requirement conflict: requires both brevity and detail".to_string());
     }
 
-    // 检查风格冲突
+    // Check style conflicts
     if prompt.contains("formal") && prompt.contains("casual") {
-        conflicts.push("风格冲突：同时要求正式和随意".to_string());
+        conflicts.push("Style conflict: requires both formal and casual elements".to_string());
     }
 
     conflicts
 }
 
-/// 建议优化方案
+/// Suggest optimizations
 fn suggest_optimizations(prompt: &str) -> Vec<String> {
     let mut suggestions = Vec::new();
 
-    // 长度检查
+    // Length check
     if prompt.len() < 20 {
-        suggestions.push("建议增加更多上下文信息".to_string());
+        suggestions.push("Consider adding more contextual information".to_string());
     }
 
-    // 结构检查
+    // Structure check
     if !prompt.contains("##") && !prompt.contains("-") {
-        suggestions.push("建议添加结构化格式".to_string());
+        suggestions.push("Consider adding a structured format".to_string());
     }
 
-    // 示例检查
+    // Example check
     if !prompt.contains("example") && !prompt.contains("```") {
-        suggestions.push("建议添加示例说明".to_string());
+        suggestions.push("Consider adding an example for clarification".to_string());
     }
 
     suggestions

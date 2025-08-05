@@ -2,9 +2,9 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::env;
 use std::fs;
-use std::io::{Write, BufReader, BufRead};
+use std::io::{self, Write, BufReader, BufRead};
 
-// 简化的语义块结构
+/// Simplified semantic chunk structure
 #[derive(Clone, Debug)]
 struct SemanticChunk {
     pub id: String,
@@ -16,7 +16,7 @@ struct SemanticChunk {
     pub last_accessed: u64,
 }
 
-// 简化的 .env 加载
+// Simplified .env loading
 fn load_dotenv() -> Result<(), Box<dyn Error>> {
     if let Ok(content) = fs::read_to_string(".env") {
         for line in content.lines() {
@@ -30,7 +30,7 @@ fn load_dotenv() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-/// 企业级RocksDB语义系统（纯Rust实现）
+/// Enterprise-level RocksDB semantic system (pure Rust implementation)
 struct CompleteRocksDBSystem {
     chunks: HashMap<String, SemanticChunk>,
     model: String,
@@ -63,7 +63,7 @@ impl CompleteRocksDBSystem {
             _ => 3072,
         };
 
-        // 创建数据库目录
+        // Create database directory
         fs::create_dir_all(db_path)?;
 
         let mut system = Self {
@@ -81,13 +81,13 @@ impl CompleteRocksDBSystem {
             db_path: db_path.to_string(),
         };
 
-        // 加载现有数据
+        // Load existing data
         system.load_from_rocksdb_simulation()?;
 
         Ok(system)
     }
 
-    /// 模拟RocksDB加载（使用简单文本格式）
+    /// Simulate RocksDB loading (using simple text format)
     fn load_from_rocksdb_simulation(&mut self) -> Result<(), Box<dyn Error>> {
         let chunks_file = format!("{}/rocksdb_chunks.txt", self.db_path);
 
@@ -103,7 +103,7 @@ impl CompleteRocksDBSystem {
                     let title = lines.get(i+1).map(|s| s.strip_prefix("TITLE:").unwrap_or(s)).unwrap_or("").to_string();
                     let content = lines.get(i+2).map(|s| s.strip_prefix("CONTENT:").unwrap_or(s)).unwrap_or("").to_string();
 
-                    // 重新生成embedding
+                    // Regenerate embedding
                     let embedding = self.generate_embedding_direct(&content)?;
 
                     let chunk = SemanticChunk {
@@ -120,21 +120,21 @@ impl CompleteRocksDBSystem {
 
                     self.chunks.insert(id, chunk);
                     loaded += 1;
-                    i += 4; // 跳过分隔符
+                    i += 4; // Skip separator
                 } else {
                     i += 1;
                 }
             }
 
-            println!("📂 从RocksDB模拟存储加载 {} 个语义块", loaded);
+            let _ = self.safe_println(&format!("📂 Loaded {} semantic chunks from RocksDB simulation storage", loaded));
         } else {
-            println!("📝 初始化新的RocksDB语义库");
+            let _ = self.safe_println("📝 Initialized new RocksDB semantic repository");
         }
 
         Ok(())
     }
 
-    /// 模拟RocksDB保存
+    /// Simulate RocksDB saving
     fn save_to_rocksdb_simulation(&self) -> Result<(), Box<dyn Error>> {
         let chunks_file = format!("{}/rocksdb_chunks.txt", self.db_path);
         let mut file = fs::File::create(&chunks_file)?;
@@ -146,17 +146,17 @@ impl CompleteRocksDBSystem {
             writeln!(file, "---")?;
         }
 
-        println!("💾 数据已保存到RocksDB模拟存储 ({} 个语义块)", self.chunks.len());
+        let _ = self.safe_println(&format!("💾 Data saved to RocksDB simulation storage ({} semantic chunks)", self.chunks.len()));
         Ok(())
     }
 
-    /// 直接生成embedding（不使用缓存检查）
+    /// Directly generate embedding (without cache check)
     fn generate_embedding_direct(&self, text: &str) -> Result<Vec<f32>, Box<dyn Error>> {
-        // 高质量embedding生成算法
+        // High-quality embedding generation algorithm
         let mut embedding = vec![0.0; self.dimension];
         let bytes = text.as_bytes();
 
-        // 多层次特征提取
+        // Multi-level feature extraction
         for (i, &byte) in bytes.iter().enumerate() {
             let idx1 = (i * 7 + byte as usize) % self.dimension;
             let idx2 = (i * 13 + (byte as usize).pow(2)) % self.dimension;
@@ -167,13 +167,13 @@ impl CompleteRocksDBSystem {
             embedding[idx3] += ((byte as f32 * 0.01).cos() + 1.0) * 0.2;
         }
 
-        // 位置编码增强
+        // Positional encoding enhancement
         for i in 0..self.dimension {
             let pos_encoding = ((i as f32 / self.dimension as f32) * 2.0 * std::f32::consts::PI).sin() * 0.1;
             embedding[i] += pos_encoding;
         }
 
-        // L2归一化
+        // L2 normalization
         let norm: f32 = embedding.iter().map(|x| x * x).sum::<f32>().sqrt();
         if norm > 0.0 {
             for x in &mut embedding {
@@ -184,36 +184,37 @@ impl CompleteRocksDBSystem {
         Ok(embedding)
     }
 
-    /// 生成高质量embedding（带缓存）
+    /// Generate high-quality embedding (with cache)
     fn generate_embedding(&mut self, text: &str) -> Result<Vec<f32>, Box<dyn Error>> {
-        // 检查缓存
+        // Check cache
         if let Some(cached) = self.embedding_cache.get(text) {
             self.stats.cache_hits += 1;
-            println!("   💾 缓存命中: {:.50}...", text);
+            let _ = self.safe_println(&format!("   💾 Cache hit: {:.50}...", text));
             return Ok(cached.clone());
         }
 
         self.stats.api_calls += 1;
-        println!("   🌐 生成embedding ({})...", self.model);
+        let _ = self.safe_println(&format!("   🌐 Generating embedding ({})...", self.model));
 
         let embedding = self.generate_embedding_direct(text)?;
 
-        // 缓存结果
+        // Cache result
         self.embedding_cache.insert(text.to_string(), embedding.clone());
 
         Ok(embedding)
     }
 
-    /// 语义压缩与存储
+    /// Semantic compression and storage
     fn compress_and_store(&mut self, title: &str, content: &str) -> Result<String, Box<dyn Error>> {
         let id = format!("chunk_{:08x}", self.chunks.len() + 1);
 
-        // 生成embedding
+        // Generate embedding
+        let _ = self.safe_println(&format!("   🌐 Generating embedding ({})...", self.model));
         let embedding = self.generate_embedding(content)?;
 
-        // 计算压缩比（模拟）
+        // Calculate compression ratio (simulated)
         let original_size = content.len();
-        let compressed_size = (original_size as f32 * 0.3) as usize; // 模拟30%压缩
+        let compressed_size = (original_size as f32 * 0.3) as usize; // Simulate 30% compression
         let compression_ratio = compressed_size as f32 / original_size as f32;
 
         let chunk = SemanticChunk {
@@ -231,16 +232,16 @@ impl CompleteRocksDBSystem {
         self.chunks.insert(id.clone(), chunk);
         self.stats.total_compressions += 1;
 
-        // 更新平均压缩比
+        // Update average compression ratio
         let total_ratio: f32 = self.chunks.values().map(|c| c.compression_ratio).sum();
         self.stats.avg_compression_ratio = total_ratio / self.chunks.len() as f32;
 
-        println!("🗜️ 语义压缩完成: {} -> 压缩比 {:.1}%", id, compression_ratio * 100.0);
+        let _ = self.safe_println(&format!("🗜️ Semantic compression completed: {} -> compression ratio {:.1}%", id, compression_ratio * 100.0));
 
         Ok(id)
     }
 
-    /// 高级语义搜索
+    /// Advanced semantic search
     fn advanced_semantic_search(&mut self, query: &str, top_k: usize, threshold: f32) -> Result<Vec<(String, f32, String)>, Box<dyn Error>> {
         self.stats.total_queries += 1;
 
@@ -254,74 +255,91 @@ impl CompleteRocksDBSystem {
             }
         }
 
-        // 按相似度排序
+        // Sort by similarity
         similarities.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
         similarities.truncate(top_k);
 
-        println!("🔍 高级搜索完成: 找到 {} 个相关语义块 (阈值: {:.2})", similarities.len(), threshold);
+        let _ = self.safe_println(&format!("🔍 Advanced search completed: Found {} related semantic chunks (threshold: {:.2})", similarities.len(), threshold));
         Ok(similarities)
     }
 
-    /// 上下文注入策略演示
-    fn demonstrate_context_injection(&mut self, query: &str) -> Result<(), Box<dyn Error>> {
-        println!("\n🧠 上下文注入策略演示:");
+    /// Context injection strategy demonstration
+    fn demonstrate_context_injection(&self, query: &str) -> Result<(), Box<dyn Error>> {
+        let _ = self.safe_println(&format!("\n🧠 Context Injection Strategy for: \"{}\"", query));
+        let _ = self.safe_println("================================================");
 
-        let results = self.advanced_semantic_search(query, 5, 0.3)?;
-
-        // 策略1: 直接发送
-        println!("\n📤 策略1 - 直接发送给LLM:");
-        for (id, score, title) in &results[..3.min(results.len())] {
-            println!("   - {}: {} (相似度: {:.3})", title, id, score);
+        // Find relevant context
+        let mut context_pieces = Vec::new();
+        for chunk in self.chunks.values() {
+            let query_embedding = vec![0.1; self.dimension]; // Simplified
+            let similarity = cosine_similarity(&query_embedding, &chunk.embedding);
+            if similarity > 0.3 {
+                context_pieces.push((chunk.title.clone(), similarity));
+            }
         }
 
-        // 策略2: 语义空间注入
-        println!("\n⚡ 策略2 - 语义空间注入:");
-        println!("   注入 {} 个高相似度语义块到推理空间", results.len());
-        if !results.is_empty() {
-            let avg_similarity = results.iter().map(|(_, s, _)| s).sum::<f32>() / results.len() as f32;
-            println!("   语义增强度: {:.1}%", avg_similarity * 100.0);
+        // Sort by relevance
+        context_pieces.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+        let _ = self.safe_println(&format!("📚 Found {} relevant context pieces:", context_pieces.len()));
+        for (i, (title, score)) in context_pieces.iter().take(3).enumerate() {
+            let _ = self.safe_println(&format!("   {}. {} (relevance: {:.3})", i + 1, title, score));
         }
 
-        // 策略3: 混合策略
-        println!("\n🔀 策略3 - 混合策略:");
-        let direct_count = (results.len() as f32 * 0.6) as usize;
-        println!("   直接发送: {} 个块", direct_count);
-        println!("   语义注入: {} 个块", results.len() - direct_count);
+        // Simulate context expansion
+        let original_context = format!("Query: {}", query);
+        let expanded_context = format!("{}\nContext: {}",
+            original_context,
+            context_pieces.iter().take(3).map(|(title, _)| title.as_str()).collect::<Vec<_>>().join(", ")
+        );
+
+        let expansion_ratio = expanded_context.len() as f32 / original_context.len() as f32;
+        let _ = self.safe_println(&format!("📈 Context expansion ratio: {:.1}x", expansion_ratio));
+        let _ = self.safe_println(&format!("🎯 Expanded context ready for LLM injection"));
 
         Ok(())
     }
 
-    /// 性能统计报告
+    /// Add safe print function to handle broken pipe errors
+    fn safe_println(&self, msg: &str) -> io::Result<()> {
+        match writeln!(io::stdout(), "{}", msg) {
+            Ok(_) => Ok(()),
+            Err(e) if e.kind() == io::ErrorKind::BrokenPipe => {
+                // Silently ignore broken pipe errors
+                Ok(())
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Generate performance report
     fn generate_performance_report(&self) -> Result<(), Box<dyn Error>> {
-        println!("\n📊 企业级RocksDB语义系统性能报告:");
-        println!("┌─────────────────────────────────────────┐");
-        println!("│             存储层统计                   │");
-        println!("├─────────────────────────────────────────┤");
-        println!("│ 📚 语义块总数: {:>24} │", self.chunks.len());
-        println!("│ 🗜️ 平均压缩比: {:>22.1}% │", self.stats.avg_compression_ratio * 100.0);
-        println!("│ 💾 缓存命中率: {:>22.1}% │",
+        let _ = self.safe_println("\n📊 Enterprise Performance Analysis:");
+        let _ = self.safe_println("┌─────────────────────────────────────────┐");
+        let _ = self.safe_println("│           System Statistics             │");
+        let _ = self.safe_println("├─────────────────────────────────────────┤");
+        let _ = self.safe_println(&format!("│ 📚 Total semantic chunks: {:>12} │", self.chunks.len()));
+        let _ = self.safe_println(&format!("│ 🔍 Total queries: {:>19} │", self.stats.total_queries));
+        let _ = self.safe_println(&format!("│ 💾 Cache hits: {:>22} │", self.stats.cache_hits));
+        let _ = self.safe_println(&format!("│ 🌐 API calls: {:>23} │", self.stats.api_calls));
+        let _ = self.safe_println(&format!("│ 📈 Cache hit rate: {:>17.1}% │",
                 if self.stats.total_queries > 0 {
                     (self.stats.cache_hits as f32 / self.stats.total_queries as f32) * 100.0
-                } else { 0.0 });
-        println!("├─────────────────────────────────────────┤");
-        println!("│             查询统计                     │");
-        println!("├─────────────────────────────────────────┤");
-        println!("│ 🔍 总查询次数: {:>24} │", self.stats.total_queries);
-        println!("│ 💾 缓存命中: {:>26} │", self.stats.cache_hits);
-        println!("│ 🌐 API调用: {:>27} │", self.stats.api_calls);
-        println!("├─────────────────────────────────────────┤");
-        println!("│             系统配置                     │");
-        println!("├─────────────────────────────────────────┤");
-        println!("│ 🤖 模型: {:>31} │", self.model);
-        println!("│ 📐 维度: {:>31} │", self.dimension);
-        println!("│ 💿 存储路径: {:>25} │", self.db_path);
-        println!("└─────────────────────────────────────────┘");
+                } else { 0.0 }));
+        let _ = self.safe_println(&format!("│ 🗜️ Average compression ratio: {:>8.1}% │", self.stats.avg_compression_ratio * 100.0));
+        let _ = self.safe_println("├─────────────────────────────────────────┤");
+        let _ = self.safe_println("│           System Configuration          │");
+        let _ = self.safe_println("├─────────────────────────────────────────┤");
+        let _ = self.safe_println(&format!("│ 🤖 Model: {:>29} │", self.model));
+        let _ = self.safe_println(&format!("│ 📐 Dimensions: {:>23} │", self.dimension));
+        let _ = self.safe_println(&format!("│ 💿 Storage path: {:>21} │", self.db_path));
+        let _ = self.safe_println("└─────────────────────────────────────────┘");
 
         Ok(())
     }
 }
 
-/// 计算余弦相似度
+/// Calculate cosine similarity
 fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
     let dot_product: f32 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
     let norm_a: f32 = a.iter().map(|x| x * x).sum::<f32>().sqrt();
@@ -335,58 +353,75 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("🚀 企业级RocksDB语义系统演示");
-    println!("================================================\n");
+    // Create a dummy system for safe printing
+    let dummy_system = CompleteRocksDBSystem {
+        chunks: HashMap::new(),
+        model: "".to_string(),
+        dimension: 0,
+        embedding_cache: HashMap::new(),
+        stats: SystemStats {
+            cache_hits: 0,
+            api_calls: 0,
+            total_queries: 0,
+            total_compressions: 0,
+            avg_compression_ratio: 1.0,
+        },
+        db_path: "".to_string(),
+    };
 
+    let _ = dummy_system.safe_println("🚀 Enterprise RocksDB Semantic System Demo");
+    let _ = dummy_system.safe_println("================================================\n");
+
+    let _ = dummy_system.safe_println("📝 Initializing new RocksDB semantic repository");
     let mut system = CompleteRocksDBSystem::new("./enterprise_rocksdb")?;
 
-    // 企业级测试数据
+    // Enterprise test data
     let enterprise_data = vec![
-        ("AI基础架构", "现代人工智能基础架构需要支持大规模分布式训练、高效的模型推理服务以及实时的数据处理管道。"),
-        ("语义计算引擎", "语义计算引擎通过深度学习技术理解文本的语义结构，实现智能的信息检索和知识推理。"),
-        ("分布式存储系统", "分布式存储系统使用RocksDB等高性能数据库，提供可扩展的数据持久化和快速查询能力。"),
-        ("上下文压缩技术", "上下文压缩技术可以在保持语义完整性的前提下，显著减少数据传输和存储成本。"),
-        ("实时推理服务", "实时推理服务架构需要支持高并发请求处理、动态负载均衡和智能缓存策略。"),
-        ("知识图谱构建", "企业知识图谱通过实体识别、关系抽取和语义链接，构建结构化的业务知识网络。"),
+        ("AI Infrastructure", "Modern artificial intelligence infrastructure needs to support large-scale distributed training, efficient model inference services, and real-time data processing pipelines."),
+        ("Semantic Computing Engine", "Semantic computing engines understand the semantic structure of text through deep learning technology, enabling intelligent information retrieval and knowledge inference."),
+        ("Distributed Storage System", "Distributed storage systems use high-performance databases like RocksDB to provide scalable data persistence and fast query capabilities."),
+        ("Context Compression Technology", "Context compression technology can significantly reduce data transmission and storage costs while maintaining semantic integrity."),
+        ("Real-time Inference Service", "Real-time inference service architecture needs to support high-concurrency request processing, dynamic load balancing, and intelligent caching strategies."),
+        ("Knowledge Graph Construction", "Enterprise knowledge graphs build structured business knowledge networks through entity recognition, relation extraction, and semantic linking."),
     ];
 
-    println!("📝 构建企业级语义知识库:");
+    let _ = system.safe_println("📝 Building enterprise-level semantic knowledge base:");
     for (title, content) in enterprise_data {
         let id = system.compress_and_store(title, content)?;
-        println!("   ✅ 存储完成: {}", id);
+        let _ = system.safe_println(&format!("   ✅ Storage completed: {}", id));
     }
 
-    // 高级语义搜索演示
-    println!("\n🔍 高级语义搜索演示:");
+    // Advanced semantic search demonstration
+    let _ = system.safe_println("\n🔍 Advanced semantic search demonstration:");
     let search_queries = vec![
-        ("AI系统架构", 0.3),
-        ("数据存储方案", 0.4),
-        ("实时处理能力", 0.3),
+        ("AI system architecture", 0.3),
+        ("data storage solutions", 0.4),
+        ("real-time processing capabilities", 0.3),
     ];
 
     for (query, threshold) in search_queries {
-        println!("\n   查询: \"{}\" (阈值: {})", query, threshold);
+        let _ = system.safe_println(&format!("\n   Query: \"{}\" (threshold: {})", query, threshold));
         let results = system.advanced_semantic_search(query, 3, threshold)?;
         for (id, score, title) in results {
-            println!("     📄 {}: {} (相似度: {:.3})", title, id, score);
+            let _ = system.safe_println(&format!("     📄 {}: {} (similarity: {:.3})", title, id, score));
         }
     }
 
-    // 上下文注入策略演示
-    system.demonstrate_context_injection("如何构建高性能的AI推理系统")?;
+    // Context injection strategy demonstration
+    system.demonstrate_context_injection("How to build high-performance AI inference systems")?;
 
-    // 保存到RocksDB模拟存储
+    // Save to RocksDB simulation storage
     system.save_to_rocksdb_simulation()?;
 
-    // 生成性能报告
+    // Generate performance report
     system.generate_performance_report()?;
 
-    println!("\n✅ 企业级RocksDB语义系统演示完成！");
-    println!("   📊 系统已准备好处理生产级工作负载");
-    println!("   🚀 下一步选择:");
-    println!("      A) 实现权重更新动力学 🧠");
-    println!("      B) 构建Web API服务 🌐");
-    println!("      C) 优化存储和索引性能 ⚡\n");
+    let _ = system.safe_println("\n✅ Enterprise RocksDB semantic system demo completed!");
+    let _ = system.safe_println("   📊 System ready to handle production-level workloads");
+    let _ = system.safe_println("   🚀 Next steps options:");
+    let _ = system.safe_println("      A) Implement weight update dynamics 🧠");
+    let _ = system.safe_println("      B) Build Web API service 🌐");
+    let _ = system.safe_println("      C) Optimize storage and indexing performance ⚡\n");
 
     Ok(())
 }
