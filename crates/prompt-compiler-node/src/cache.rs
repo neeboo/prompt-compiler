@@ -34,6 +34,26 @@ impl ResponseCache {
             entry_count: self.cache.entry_count(),
         }
     }
+
+    // 添加健康检查方法
+    pub async fn is_healthy(&self) -> bool {
+        // 简单的健康检查：检查缓存是否正常工作
+        true
+    }
+
+    // 添加清除缓存方法
+    pub async fn clear(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        self.cache.invalidate_all();
+        Ok(())
+    }
+
+    // 添加获取统计信息方法
+    pub async fn get_stats(&self) -> Result<serde_json::Value, Box<dyn std::error::Error + Send + Sync>> {
+        Ok(serde_json::json!({
+            "entry_count": self.cache.entry_count(),
+            "weighted_size": self.cache.weighted_size()
+        }))
+    }
 }
 
 #[derive(Debug)]

@@ -28,6 +28,10 @@ T_W(C,x) = T_{W+ΔW(C)}(x)
 
 - 🔄 **提示符编译**: 将自然语言提示符转换为优化的中间表示(IR)
 - ⚡ **权重动力学分析**: 基于ICL理论的实时隐式权重更新计算
+- 🚀 **PC Node上下文共享**: 先进的上下文共享系统，Token效率提升90%+
+- 🤖 **多智能体支持**: 全面的多智能体对话系统与上下文优化
+- 📊 **自动化性能测试**: 完整的单智能体和多智能体场景测试框架
+- 📈 **性能分析**: 自动化报告生成，包含详细的Token使用量和成本分析
 - 🌳 **版本控制**: Git风格的DAG版本管理系统用于提示符演进
 - 🔐 **密码学验证**: Ed25519签名确保数据完整性
 - 🗄️ **高性能存储**: RocksDB持久化存储与高效索引
@@ -42,30 +46,63 @@ T_W(C,x) = T_{W+ΔW(C)}(x)
 git clone https://github.com/neeboo/prompt-compiler.git
 cd prompt-compiler
 cargo build --release
-
-# 安装CLI工具
-cargo install --path crates/prompt-compiler-cli
 ```
 
 ### 基本使用
 
 ```bash
-# 编译优化提示符
-pc compile -p "你是一个Rust专家，帮助优化代码性能"
+# 1. 配置环境变量 (必须)
+cp .env.example .env
+# 编辑 .env 文件，添加你的 OpenAI API Key
 
-# 分析权重动力学
-pc weight-demo -c 5 --verbose
+# 2. 构建项目
+cargo build --release
 
-# 启动web服务器
-pc-server  # 访问 http://localhost:3000
+# 3. 运行PC Node性能测试
+cd scripts
+python test_runner.py  # 运行综合性能测试
+
+# 4. 生成自动化性能报告
+python generate_performance_report.py  # 生成完整的性能分析报告
+
+# 5. 查看生成的报告
+# 中文版: docs/pc_node_performance_report.zh.md
+# 英文版: docs/pc_node_performance_report.md
 ```
+
+**💡 环境配置说明**:
+- 复制 `.env.example` 为 `.env`
+- 在 `.env` 中配置你的 OpenAI API Key
+- API Key 获取: https://platform.openai.com/api-keys
+
+## 🏆 PC Node上下文共享性能
+
+我们的先进上下文共享系统带来了卓越的性能提升：
+
+### **单智能体场景**
+- **Token效率提升**: 90.3%
+- **Token节省**: 每测试周期节省28,727个tokens
+- **每轮节省**: 每次对话轮次节省1,512个tokens
+
+### **多智能体场景**  
+- **Token效率提升**: 91.3%
+- **Token节省**: 每测试周期节省36,103个tokens
+- **每轮节省**: 每次对话轮次节省1,805个tokens
+
+### **整体影响**
+- **总Token节省**: 跨测试场景总计节省64,830个tokens
+- **平均效率**: 90.9%的token减少率
+- **规模预测**: 每1000轮对话可节省1,659,000个tokens
+- **多智能体优势**: 在协作环境中上下文共享表现更佳
+
+📊 **详细性能报告**: [PC Node性能分析报告](./docs/pc_node_performance_report.zh.md)
 
 ## 📊 基准测试与性能
 
 ### 权重动力学引擎性能
 我们的ICL权重更新理论实现提供：
 
-- **收敛速度**: 50-100次迭代达到~10⁻⁴精度
+- **收敛速度**: 50-100次迭代达到~10⁻⁴精��
 - **内存效率**: 语义内容压缩比超过70%
 - **吞吐量**: 现代硬件上每秒1000+提示符处理
 - **存储性能**: RocksDB微秒级查询响应
@@ -79,20 +116,6 @@ pc-server  # 访问 http://localhost:3000
 | `semantic_compression_demo` | 上下文压缩技术 | 70%+压缩率保持语义完整性 |
 | `industry_embedding_demo` | 生产级embedding生成 | 缓存优化1000+embedding/秒 |
 
-### 运行基准测试
-
-```bash
-# 运行所有示例并生成性能报告
-cd examples
-./test_system_effectiveness.sh
-
-# 运行特定基准测试
-cargo bench
-
-# 测试权重动力学收敛
-./weight_dynamics_system
-```
-
 ## 🏗️ 架构
 
 ```
@@ -103,7 +126,7 @@ prompt-compiler/
 │   ├── 🗄️  prompt-compiler-storage/ # RocksDB持久化
 │   ├── 🔐 prompt-compiler-crypto/  # Ed25519验证
 │   ├── 🌐 prompt-compiler-web/     # REST API服务器
-│   └── 📚 prompt-compiler-sdk/     # 集成SDK
+│   └── ���� prompt-compiler-sdk/     # 集成SDK
 ├── 🔍 examples/                   # 使用演示与基准测试
 └── 📊 benches/                    # 性能测试
 ```
@@ -112,7 +135,7 @@ prompt-compiler/
 
 探索 [`examples/`](./examples/) 中的综合示例套件：
 
-- **`complete_rocksdb_demo`**: 完整企业语义系统
+- **`complete_rocksdb_demo`**: ��整企业语义系统
 - **`weight_dynamics_system`**: ICL权重更新实现
 - **`semantic_compression_demo`**: 上下文压缩技术
 - **`web_api_semantic_server`**: 生产就绪API服务器
@@ -144,7 +167,7 @@ prompt-compiler/
 ### 优先级3: 工程优化
 - [ ] **批处理支持**
   - 矢量化权重更新操作
-  - 多查询的并行上下文处理
+  - 多查询的并行上下文处���
   - 大数据集的内存高效批处理
   - 连续处理的流式API
 
@@ -152,14 +175,14 @@ prompt-compiler/
   - 矩阵操作的CUDA/OpenCL内核
   - GPU加速的softmax和注意力计算
   - CPU/GPU间内存传输优化
-  - 基准对比：CPU vs GPU性能
+  - ���准对比：CPU vs GPU性能
 
 - [ ] **内存优化**
   - 频繁访问上下文的智能缓存策略
   - 大型embedding的内存池管理
   - 历史权重更新的懒加载
   - 内存分析和泄漏检测工具
-  - 零拷贝操作优化
+  - 零拷贝���作优化
 
 ### 未来增强功能
 - [ ] **多Agent上下文共享系统**
@@ -173,4 +196,4 @@ prompt-compiler/
 
 ## 🙏 致谢
 
-基于隐式上下文学习动力学的理论基础构建。特别感谢推进我们对transformer机制理解的研究社区。
+基于隐式上下文学习动力学的理论基础构建。特别感谢推进我们对transformer机制理解的���究社区。

@@ -28,6 +28,10 @@ Where `ΔW(C)` represents a **rank-1 weight update** generated from context C.
 
 - 🔄 **Prompt Compilation**: Transform natural language prompts into optimized intermediate representations (IR)
 - ⚡ **Weight Dynamics Analysis**: Real-time computation of implicit weight updates based on ICL theory
+- 🚀 **PC Node Context Sharing**: Advanced context sharing system with 90%+ token efficiency improvement
+- 🤖 **Multi-Agent Support**: Comprehensive multi-agent conversation system with context optimization
+- 📊 **Automated Performance Testing**: Complete testing framework for single-agent and multi-agent scenarios
+- 📈 **Performance Analytics**: Automated report generation with detailed token usage and cost analysis
 - 🌳 **Version Control**: Git-style DAG version management system for prompt evolution
 - 🔐 **Cryptographic Verification**: Ed25519 signatures ensure data integrity
 - 🗄️ **High-Performance Storage**: RocksDB persistent storage with efficient indexing
@@ -42,30 +46,63 @@ Where `ΔW(C)` represents a **rank-1 weight update** generated from context C.
 git clone https://github.com/neeboo/prompt-compiler.git
 cd prompt-compiler
 cargo build --release
-
-# Install CLI tool
-cargo install --path crates/prompt-compiler-cli
 ```
 
 ### Basic Usage
 
 ```bash
-# Compile and optimize a prompt
-pc compile -p "You are a Rust expert. Help optimize code performance"
+# 1. Configure environment variables (Required)
+cp .env.example .env
+# Edit .env file and add your OpenAI API Key
 
-# Analyze weight dynamics
-pc weight-demo -c 5 --verbose
+# 2. Build the project
+cargo build --release
 
-# Start web server
-pc-server  # Access at http://localhost:3000
+# 3. Run PC Node Context Sharing performance tests
+cd scripts
+python test_runner.py  # Run comprehensive performance tests
+
+# 4. Generate automated performance reports
+python generate_performance_report.py  # Generate complete performance analysis
+
+# 5. View generated reports
+# English: docs/pc_node_performance_report.md
+# Chinese: docs/pc_node_performance_report.zh.md
 ```
+
+**💡 Environment Configuration**:
+- Copy `.env.example` to `.env`
+- Configure your OpenAI API Key in `.env`
+- Get API Key: https://platform.openai.com/api-keys
+
+## 🏆 PC Node Context Sharing Performance
+
+Our advanced Context Sharing system delivers exceptional performance improvements:
+
+### **Single Agent Scenario**
+- **Token Efficiency Improvement**: 90.3%
+- **Token Savings**: 28,727 tokens per test cycle
+- **Per Round Savings**: 1,512 tokens per conversation turn
+
+### **Multi-Agent Scenario**  
+- **Token Efficiency Improvement**: 91.3%
+- **Token Savings**: 36,103 tokens per test cycle
+- **Per Round Savings**: 1,805 tokens per conversation turn
+
+### **Overall Impact**
+- **Total Token Savings**: 64,830 tokens across test scenarios
+- **Average Efficiency**: 90.9% token reduction
+- **Scale Projection**: 1,659,000 tokens saved per 1,000 conversation turns
+- **Multi-Agent Advantage**: Context Sharing performs even better in collaborative environments
+
+📊 **Detailed Performance Report**: [PC Node Performance Analysis](./docs/pc_node_performance_report.md)
 
 ## 📊 Benchmarks & Performance
 
 ### Weight Dynamics Engine Performance
 Our implementation of the ICL weight update theory delivers:
 
-- **Convergence Rate**: ~10⁻⁴ precision in 50-100 iterations
+- **Convergence Rate**: ~10⁴ precision in 50-100 iterations
 - **Memory Efficiency**: 70%+ compression ratio for semantic content
 - **Throughput**: 1000+ prompts/second on modern hardware
 - **Storage**: RocksDB with microsecond-level query performance
@@ -78,20 +115,7 @@ Our implementation of the ICL weight update theory delivers:
 | `weight_dynamics_system` | ICL theory implementation | 10⁻⁴ convergence in <100 iterations |
 | `semantic_compression_demo` | Context compression technology | 70%+ compression with semantic integrity |
 | `industry_embedding_demo` | Production embedding generation | 1000+ embeddings/sec with caching |
-
-### Run Benchmarks
-
-```bash
-# Run all examples and generate performance report
-cd examples
-./test_system_effectiveness.sh
-
-# Run specific benchmarks
-cargo bench
-
-# Test weight dynamics convergence
-./weight_dynamics_system
-```
+| `pc_node_context_sharing_demo` | Advanced context sharing system | 90%+ token efficiency improvement |
 
 ## 🏗️ Architecture
 
@@ -99,13 +123,23 @@ cargo bench
 prompt-compiler/
 ├── 📦 crates/                     # Core library collection
 │   ├── 🧠 prompt-compiler-core/   # Compilation engine & IR
+│   ├── 🔗 prompt-compiler-node/   # PC Node context sharing system
 │   ├── ⚖️  prompt-compiler-weights/ # ICL weight dynamics
 │   ├── 🗄️  prompt-compiler-storage/ # RocksDB persistence
 │   ├── 🔐 prompt-compiler-crypto/  # Ed25519 verification
 │   ├── 🌐 prompt-compiler-web/     # REST API server
 │   └── 📚 prompt-compiler-sdk/     # Integration SDK
 ├── 🔍 examples/                   # Usage demos & benchmarks
-└── 📊 benches/                    # Performance tests
+├── 📊 benches/                    # Performance tests
+├── 🧪 scripts/                    # Automated testing & reporting
+│   ├── test_runner.py             # Comprehensive test execution
+│   ├── test_data_analyzer.py      # Performance data analysis
+│   ├── generate_performance_report.py # Automated report generation
+│   └── utils/                     # Testing utilities
+└── 📖 docs/                       # Documentation & reports
+    ├── pc_node_performance_report.md    # English performance report
+    ├── pc_node_performance_report.zh.md # Chinese performance report
+    └── images/                    # Performance charts & visualizations
 ```
 
 ## 🔍 Examples & Demos
@@ -117,6 +151,7 @@ Explore our comprehensive example suite in [`examples/`](./examples/):
 - **`semantic_compression_demo`**: Context compression technology
 - **`web_api_semantic_server`**: Production-ready API server
 - **`industry_embedding_demo`**: High-performance embedding generation
+- **`pc_node_context_sharing_demo`**: Advanced context sharing system
 
 See [`examples/README.md`](./examples/README.md) for detailed usage instructions.
 

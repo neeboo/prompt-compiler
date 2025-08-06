@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, State, Query},
     http::{HeaderMap, StatusCode},
     response::Json,
     routing::{get, post},
@@ -7,6 +7,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use std::collections::HashMap;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tracing::{info, warn, error};
@@ -15,11 +16,13 @@ mod llm_client;
 mod cache;
 mod context_engine;
 mod storage;
+mod api_server;  // 新增API服务器模块
 
 use llm_client::LLMClient;
 use cache::ResponseCache;
 use context_engine::ContextEngine;
 use storage::NodeStorage;
+pub use api_server::PCNodeServer;  // 导出服务器
 
 /// OpenAI compatible chat completion request
 #[derive(Debug, Deserialize)]
@@ -279,16 +282,9 @@ pub async fn run_server(port: u16) -> anyhow::Result<()> {
         storage,
     };
 
-    let app = create_router(state);
-    let addr = format!("0.0.0.0:{}", port);
-    let listener = TcpListener::bind(&addr).await?;
-
-    info!("🚀 Prompt Compiler Node running on http://{}", addr);
-    info!("📖 OpenAI Compatible API: http://{}/v1/chat/completions", addr);
-    info!("🧠 PC Enhanced API: http://{}/v1/pc/context-completion", addr);
-    info!("❤️  Health Check: http://{}/health", addr);
-
-    axum::serve(listener, app).await?;
+    // 使用新的 PCNodeServer 替代旧的简单路由
+    let server = PCNodeServer::new(state, port);
+    server.serve().await?;
 
     Ok(())
 }
