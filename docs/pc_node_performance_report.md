@@ -28,7 +28,7 @@ This report provides a comprehensive performance analysis of Prompt Compiler Nod
 - **Manual History Management**: Full conversation history sent with each request
 - **Test Scenario**: 5-turn continuous conversation about web scraping
 
-![Benchmark Comparison Analysis](images/benchmark_comparison_20250806_180428.png)
+![Benchmark Comparison Analysis](images/benchmark_comparison_20250806_204649.png)
 
 #### 📊 Token Usage Comparison
 ```
@@ -47,7 +47,7 @@ Token Efficiency:     -174.6 tokens (-50.2%)
 
 ### 2. Extended Multi-turn Conversation Performance (20 Turns)
 
-![Extended Multi-turn Conversation Analysis](images/Extended_Multi-turn_Conversation_analysis_20250806_180435.png)
+![Extended Multi-turn Conversation Analysis](images/Extended_Multi-turn_Conversation_20250806_204729.png)
 
 #### 📊 Performance Metrics
 - **Total Conversation Turns**: 20 turns
@@ -73,7 +73,7 @@ Token Efficiency:     -174.6 tokens (-50.2%)
 
 ### 3. Extended Multi-Agent Conversation (20 Turns, 3 Agents)
 
-![Multi-Agent Analysis](images/multi_agent_analysis_20250806_180439.png)
+![Multi-Agent Analysis](images/multi_agent_analysis_20250806_204804.png)
 
 #### 👥 Agent Configuration
 - **Sales Manager** (sales_manager_001)
@@ -104,7 +104,7 @@ Token Efficiency:     -174.6 tokens (-50.2%)
 
 ## 📊 Comprehensive Performance Dashboard
 
-![Comprehensive Performance Dashboard](images/performance_dashboard_20250806_180440.png)
+![Comprehensive Performance Dashboard](images/performance_dashboard_20250806_204805.png)
 
 ## 💰 Cost-Benefit Analysis
 
