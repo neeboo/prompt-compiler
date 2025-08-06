@@ -1,0 +1,33 @@
+{
+  "test_config": {
+    "base_url": "http://localhost:3000",
+    "model": "gpt-3.5-turbo",
+    "temperature": 0.7,
+    "max_tokens": 150,
+    "conversation_rounds": 20
+  },
+  "conversation_scenarios": {
+    "web_scraping": [
+      "I need help with web scraping. Can you guide me through the basics?",
+      "What's the best Python library for web scraping?",
+      "How do I handle JavaScript-rendered content?",
+      "Can you show me how to use BeautifulSoup?",
+      "What about handling rate limiting and being respectful?",
+      "How do I parse different types of data formats?",
+      "What are the legal considerations?",
+      "How can I make my scraper more robust?",
+      "Can you help me with handling cookies and sessions?",
+      "What's the best way to store scraped data?",
+      "How do I handle pagination?",
+      "What about dealing with CAPTCHAs?",
+      "Can you show me how to use Selenium?",
+      "How do I make my scraper run faster?",
+      "What are some common pitfalls to avoid?",
+      "How can I monitor my scraper's performance?",
+      "What about scraping APIs vs HTML?",
+      "How do I handle errors gracefully?",
+      "Can you help me with proxy rotation?"
+    ]
+  }
+}
+

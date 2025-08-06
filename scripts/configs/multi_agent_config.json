@@ -1,0 +1,111 @@
+{
+  "test_config": {
+    "base_url": "http://localhost:3000",
+    "model": "gpt-3.5-turbo",
+    "temperature": 0.7,
+    "max_tokens": 150,
+    "conversation_rounds": 20
+  },
+  "agents": {
+    "sales_manager_001": {
+      "name": "销售经理",
+      "role": "负责客户沟通和需求分析",
+      "context_group": "enterprise_customer_alpha"
+    },
+    "tech_lead_002": {
+      "name": "技术负责人",
+      "role": "负责技术方案设计和实施",
+      "context_group": "enterprise_customer_alpha"
+    },
+    "project_manager_003": {
+      "name": "项目经理",
+      "role": "负责项目协调和进度管理",
+      "context_group": "enterprise_customer_alpha"
+    }
+  },
+  "conversation_scenarios": {
+    "enterprise_project": [
+      {
+        "agent": "sales_manager_001",
+        "message": "我们有一个新的企业客户，需要一个定制的CRM系统。客户是一家500人的制造企业。"
+      },
+      {
+        "agent": "tech_lead_002",
+        "message": "了解。这个CRM系统主要需要哪些功能模块？数据量大概是什么规模？"
+      },
+      {
+        "agent": "project_manager_003",
+        "message": "从项目管理角度，我们需要确定时间线。客户期望的交付时间是什么时候？"
+      },
+      {
+        "agent": "sales_manager_001",
+        "message": "客户主要需要客户管理、销售管道、报表分析和移动端支持。预计6个月内交付。"
+      },
+      {
+        "agent": "tech_lead_002",
+        "message": "6个月时间比较紧张。建议采用微服务架构，可以并行开发。数据库考虑用PostgreSQL。"
+      },
+      {
+        "agent": "project_manager_003",
+        "message": "我来制定详细的项目计划。需要多少开发人员？前端和后端分别需要几人？"
+      },
+      {
+        "agent": "tech_lead_002",
+        "message": "建议4个后端开发，2个前端开发，1个UI设计师。还需要1个DevOps工程师。"
+      },
+      {
+        "agent": "sales_manager_001",
+        "message": "成本方面客户比较敏感。我们能不能优化一下人员配置？"
+      },
+      {
+        "agent": "project_manager_003",
+        "message": "可以考虑分阶段交付。第一阶段先做核心功能，后续迭代添加高级特性。"
+      },
+      {
+        "agent": "tech_lead_002",
+        "message": "同意分阶段方案。第一阶段可以减少到3个后端，1个前端，共享UI设计师。"
+      },
+      {
+        "agent": "sales_manager_001",
+        "message": "很好。客户还关心数据安全和隐私保护。这方面有什么方案？"
+      },
+      {
+        "agent": "tech_lead_002",
+        "message": "我们可以实施端到端加密，数据库加密存储，还有完善的权限管理系统。"
+      },
+      {
+        "agent": "project_manager_003",
+        "message": "安全测试也要纳入项目计划。建议找第三方安全公司做渗透测试。"
+      },
+      {
+        "agent": "sales_manager_001",
+        "message": "客户询问是否支持集成他们现有的ERP系统。这个技术上可行吗？"
+      },
+      {
+        "agent": "tech_lead_002",
+        "message": "可以通过API集成。需要了解他们ERP系统的具体类型和版本。"
+      },
+      {
+        "agent": "project_manager_003",
+        "message": "ERP集成会增加项目复杂度。建议作为第二阶段的功能，或者单独报价。"
+      },
+      {
+        "agent": "sales_manager_001",
+        "message": "明白了。我整理一下方案给客户。大家还有其他需要考虑的点吗？"
+      },
+      {
+        "agent": "tech_lead_002",
+        "message": "建议加上系统性能要求的讨论。比如并发用户数、响应时间等指标。"
+      },
+      {
+        "agent": "project_manager_003",
+        "message": "还有运维和培训。交付后的技术支持和用户培训也要规划好。"
+      },
+      {
+        "agent": "sales_manager_001",
+        "message": "非常全面。我会把这些都整理到提案中。谢谢大家的配合！"
+      }
+    ]
+  }
+}
+

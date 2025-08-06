@@ -1,0 +1,837 @@
+{
+  "test_run_id": "pc_node_test_20250806_222145",
+  "start_time": "2025-08-06T22:21:45.123857",
+  "tests_completed": [
+    "single_agent",
+    "multi_agent"
+  ],
+  "errors": [],
+  "single_agent_results": {
+    "test_type": "single_agent_comparison",
+    "total_test_time": 4.08544397354126,
+    "conversation_rounds": 19,
+    "comparison": {
+      "scenarios": {
+        "Without Context Sharing": {
+          "avg_tokens": 1673.4736842105262,
+          "total_tokens": 31796,
+          "avg_response_time": 0.0027929230740195827,
+          "token_growth_rate": 188.32363828662082,
+          "compression_efficiency": 0,
+          "stability_coefficient": 54.517940605659454
+        },
+        "With Context Sharing": {
+          "avg_tokens": 202.89473684210526,
+          "total_tokens": 3855,
+          "avg_response_time": 0.004239032143040707,
+          "token_growth_rate": 13.370457209847608,
+          "compression_efficiency": 0,
+          "stability_coefficient": 11.133815149304603
+        }
+      },
+      "improvements": {
+        "token_efficiency": 87.87583343816833,
+        "response_time": -51.777619028363716,
+        "token_savings": 27941
+      },
+      "summary": {
+        "better_scenario": "With Context Sharing",
+        "token_improvement_pct": 87.87583343816833,
+        "time_improvement_pct": 51.777619028363716
+      }
+    },
+    "chart_path": "pc_node_charts/single_agent_comparison.png",
+    "raw_results": {
+      "without_context_sharing": [
+        {
+          "turn": 1,
+          "tokens": 172,
+          "response_time": 0.0009551048278808594,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 340,
+          "response_time": 0.0014789104461669922,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 507,
+          "response_time": 0.0015301704406738281,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 674,
+          "response_time": 0.0018990039825439453,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 841,
+          "response_time": 0.0022110939025878906,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 1009,
+          "response_time": 0.005863189697265625,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 7,
+          "tokens": 1173,
+          "response_time": 0.003757953643798828,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 8,
+          "tokens": 1340,
+          "response_time": 0.001275777816772461,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 9,
+          "tokens": 1508,
+          "response_time": 0.0018649101257324219,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 10,
+          "tokens": 1676,
+          "response_time": 0.002439737319946289,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 11,
+          "tokens": 1840,
+          "response_time": 0.002649068832397461,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 12,
+          "tokens": 2007,
+          "response_time": 0.002132892608642578,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 13,
+          "tokens": 2174,
+          "response_time": 0.004202127456665039,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 14,
+          "tokens": 2341,
+          "response_time": 0.001489877700805664,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 15,
+          "tokens": 2507,
+          "response_time": 0.0015578269958496094,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 16,
+          "tokens": 2674,
+          "response_time": 0.0014231204986572266,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 17,
+          "tokens": 2839,
+          "response_time": 0.004186868667602539,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 18,
+          "tokens": 3004,
+          "response_time": 0.005807161331176758,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 19,
+          "tokens": 3170,
+          "response_time": 0.006340742111206055,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ],
+      "with_context_sharing": [
+        {
+          "turn": 1,
+          "tokens": 219,
+          "response_time": 0.003798961639404297,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 188,
+          "response_time": 0.0048139095306396484,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 203,
+          "response_time": 0.005771160125732422,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 192,
+          "response_time": 0.007107973098754883,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 181,
+          "response_time": 0.004070281982421875,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 182,
+          "response_time": 0.003859996795654297,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 7,
+          "tokens": 178,
+          "response_time": 0.002312898635864258,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 8,
+          "tokens": 181,
+          "response_time": 0.0031349658966064453,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 9,
+          "tokens": 182,
+          "response_time": 0.0012788772583007812,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 10,
+          "tokens": 182,
+          "response_time": 0.0017511844635009766,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 11,
+          "tokens": 178,
+          "response_time": 0.0030770301818847656,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 12,
+          "tokens": 222,
+          "response_time": 0.014000177383422852,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 13,
+          "tokens": 181,
+          "response_time": 0.0047299861907958984,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 14,
+          "tokens": 232,
+          "response_time": 0.0014770030975341797,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 15,
+          "tokens": 231,
+          "response_time": 0.003086090087890625,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 16,
+          "tokens": 232,
+          "response_time": 0.004261016845703125,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 17,
+          "tokens": 230,
+          "response_time": 0.00580906867980957,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 18,
+          "tokens": 230,
+          "response_time": 0.00410914421081543,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 19,
+          "tokens": 231,
+          "response_time": 0.0020918846130371094,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ]
+    }
+  },
+  "multi_agent_results": {
+    "test_type": "multi_agent_comparison",
+    "total_test_time": 4.169964075088501,
+    "total_conversation_turns": 20,
+    "participating_agents": 3,
+    "overall_comparison": {
+      "scenarios": {
+        "Without Context Sharing": {
+          "avg_tokens": 1942.55,
+          "total_tokens": 38851,
+          "avg_response_time": 0.003881847858428955,
+          "token_growth_rate": 36.3055775196156,
+          "compression_efficiency": 0,
+          "stability_coefficient": 54.42682773872589
+        },
+        "With Context Sharing": {
+          "avg_tokens": 173.9,
+          "total_tokens": 3478,
+          "avg_response_time": 0.0028264760971069337,
+          "token_growth_rate": 3.749267721148217,
+          "compression_efficiency": 0,
+          "stability_coefficient": 14.051423291391623
+        }
+      },
+      "improvements": {
+        "token_efficiency": 91.04784947620395,
+        "response_time": 27.18735508993253,
+        "token_savings": 35373
+      },
+      "summary": {
+        "better_scenario": "With Context Sharing",
+        "token_improvement_pct": 91.04784947620395,
+        "time_improvement_pct": 27.18735508993253
+      }
+    },
+    "agent_specific_metrics": {
+      "sales_manager_001": {
+        "name": "销售经理",
+        "comparison": {
+          "scenarios": {
+            "销售经理 (Without)": {
+              "avg_tokens": 1973.2857142857142,
+              "total_tokens": 13813,
+              "avg_response_time": 0.00526012693132673,
+              "token_growth_rate": 251.85414091470952,
+              "compression_efficiency": 0,
+              "stability_coefficient": 58.69774906639028
+            },
+            "销售经理 (With)": {
+              "avg_tokens": 163.28571428571428,
+              "total_tokens": 1143,
+              "avg_response_time": 0.0025650433131626676,
+              "token_growth_rate": -22.192513368983956,
+              "compression_efficiency": 0,
+              "stability_coefficient": 19.708550167209296
+            }
+          },
+          "improvements": {
+            "token_efficiency": 91.72518641859119,
+            "response_time": 51.23609474352166,
+            "token_savings": 12670
+          },
+          "summary": {
+            "better_scenario": "销售经理 (With)",
+            "token_improvement_pct": 91.72518641859119,
+            "time_improvement_pct": 51.23609474352166
+          }
+        },
+        "turns_without": 7,
+        "turns_with": 7
+      },
+      "tech_lead_002": {
+        "name": "技术负责人",
+        "comparison": {
+          "scenarios": {
+            "技术负责人 (Without)": {
+              "avg_tokens": 1827.7142857142858,
+              "total_tokens": 12794,
+              "avg_response_time": 0.0033629962376185824,
+              "token_growth_rate": 190.12557077625573,
+              "compression_efficiency": 0,
+              "stability_coefficient": 52.55834753555638
+            },
+            "技术负责人 (With)": {
+              "avg_tokens": 175.71428571428572,
+              "total_tokens": 1230,
+              "avg_response_time": 0.0025835377829415457,
+              "token_growth_rate": -11.436170212765957,
+              "compression_efficiency": 0,
+              "stability_coefficient": 11.70957521130981
+            }
+          },
+          "improvements": {
+            "token_efficiency": 90.38611849304361,
+            "response_time": 23.177500050639065,
+            "token_savings": 11564
+          },
+          "summary": {
+            "better_scenario": "技术负责人 (With)",
+            "token_improvement_pct": 90.38611849304361,
+            "time_improvement_pct": 23.177500050639065
+          }
+        },
+        "turns_without": 7,
+        "turns_with": 7
+      },
+      "project_manager_003": {
+        "name": "项目经理",
+        "comparison": {
+          "scenarios": {
+            "项目经理 (Without)": {
+              "avg_tokens": 2040.6666666666667,
+              "total_tokens": 12244,
+              "avg_response_time": 0.002879182497660319,
+              "token_growth_rate": 163.8632986627043,
+              "compression_efficiency": 0,
+              "stability_coefficient": 50.40847708166678
+            },
+            "项目经理 (With)": {
+              "avg_tokens": 184.16666666666666,
+              "total_tokens": 1105,
+              "avg_response_time": 0.00341490904490153,
+              "token_growth_rate": 2.380952380952386,
+              "compression_efficiency": 0,
+              "stability_coefficient": 3.7411812866234193
+            }
+          },
+          "improvements": {
+            "token_efficiency": 90.97517151257759,
+            "response_time": -18.60689788426239,
+            "token_savings": 11139
+          },
+          "summary": {
+            "better_scenario": "项目经理 (With)",
+            "token_improvement_pct": 90.97517151257759,
+            "time_improvement_pct": 18.60689788426239
+          }
+        },
+        "turns_without": 6,
+        "turns_with": 6
+      }
+    },
+    "chart_paths": {
+      "overall_comparison": "pc_node_charts/multi_agent_comparison.png"
+    },
+    "raw_results": {
+      "without_context_sharing": {
+        "sales_manager_001": [
+          {
+            "turn": 1,
+            "tokens": 188,
+            "response_time": 0.005363941192626953,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 2,
+            "tokens": 741,
+            "response_time": 0.01263284683227539,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 3,
+            "tokens": 1498,
+            "response_time": 0.0037260055541992188,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 4,
+            "tokens": 2036,
+            "response_time": 0.0031778812408447266,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 5,
+            "tokens": 2587,
+            "response_time": 0.004218101501464844,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 6,
+            "tokens": 3144,
+            "response_time": 0.004171848297119141,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 7,
+            "tokens": 3619,
+            "response_time": 0.003530263900756836,
+            "compression_ratio": null,
+            "context_size": null
+          }
+        ],
+        "tech_lead_002": [
+          {
+            "turn": 1,
+            "tokens": 376,
+            "response_time": 0.002235889434814453,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 2,
+            "tokens": 935,
+            "response_time": 0.0032062530517578125,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 3,
+            "tokens": 1317,
+            "response_time": 0.003656148910522461,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 4,
+            "tokens": 1848,
+            "response_time": 0.0038208961486816406,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 5,
+            "tokens": 2222,
+            "response_time": 0.0029001235961914062,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 6,
+            "tokens": 2765,
+            "response_time": 0.0038437843322753906,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 7,
+            "tokens": 3331,
+            "response_time": 0.003877878189086914,
+            "compression_ratio": null,
+            "context_size": null
+          }
+        ],
+        "project_manager_003": [
+          {
+            "turn": 1,
+            "tokens": 548,
+            "response_time": 0.001542806625366211,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 2,
+            "tokens": 1126,
+            "response_time": 0.0026040077209472656,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 3,
+            "tokens": 1691,
+            "response_time": 0.0029120445251464844,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 4,
+            "tokens": 2401,
+            "response_time": 0.0018432140350341797,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 5,
+            "tokens": 2956,
+            "response_time": 0.004143953323364258,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 6,
+            "tokens": 3522,
+            "response_time": 0.004229068756103516,
+            "compression_ratio": null,
+            "context_size": null
+          }
+        ]
+      },
+      "with_context_sharing": {
+        "sales_manager_001": [
+          {
+            "turn": 1,
+            "tokens": 188,
+            "response_time": 0.0033369064331054688,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 2,
+            "tokens": 192,
+            "response_time": 0.0022411346435546875,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 3,
+            "tokens": 181,
+            "response_time": 0.0026328563690185547,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 4,
+            "tokens": 187,
+            "response_time": 0.004110097885131836,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 5,
+            "tokens": 135,
+            "response_time": 0.0017561912536621094,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 6,
+            "tokens": 161,
+            "response_time": 0.0013949871063232422,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 7,
+            "tokens": 99,
+            "response_time": 0.0024831295013427734,
+            "compression_ratio": null,
+            "context_size": null
+          }
+        ],
+        "tech_lead_002": [
+          {
+            "turn": 1,
+            "tokens": 187,
+            "response_time": 0.0030100345611572266,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 2,
+            "tokens": 193,
+            "response_time": 0.003726959228515625,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 3,
+            "tokens": 184,
+            "response_time": 0.002937793731689453,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 4,
+            "tokens": 166,
+            "response_time": 0.002749919891357422,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 5,
+            "tokens": 185,
+            "response_time": 0.003091096878051758,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 6,
+            "tokens": 129,
+            "response_time": 0.0011680126190185547,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 7,
+            "tokens": 186,
+            "response_time": 0.0014009475708007812,
+            "compression_ratio": null,
+            "context_size": null
+          }
+        ],
+        "project_manager_003": [
+          {
+            "turn": 1,
+            "tokens": 186,
+            "response_time": 0.0060460567474365234,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 2,
+            "tokens": 190,
+            "response_time": 0.004669189453125,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 3,
+            "tokens": 170,
+            "response_time": 0.0026547908782958984,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 4,
+            "tokens": 187,
+            "response_time": 0.00162506103515625,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 5,
+            "tokens": 182,
+            "response_time": 0.0014102458953857422,
+            "compression_ratio": null,
+            "context_size": null
+          },
+          {
+            "turn": 6,
+            "tokens": 190,
+            "response_time": 0.004084110260009766,
+            "compression_ratio": null,
+            "context_size": null
+          }
+        ]
+      }
+    }
+  },
+  "comprehensive_analysis": {
+    "test_summary": {
+      "single_agent": {
+        "without_context_sharing": {
+          "avg_tokens": 1673.4736842105262,
+          "total_tokens": 31796,
+          "avg_response_time": 0.0027929230740195827
+        },
+        "with_context_sharing": {
+          "avg_tokens": 202.89473684210526,
+          "total_tokens": 3855,
+          "avg_response_time": 0.004239032143040707
+        },
+        "improvements": {
+          "token_efficiency": 87.87583343816833,
+          "token_savings": 27941,
+          "response_time_change": -51.777619028363716
+        }
+      },
+      "multi_agent": {}
+    },
+    "performance_insights": {
+      "context_sharing_effectiveness": {
+        "single_agent_efficiency": 87.87583343816833,
+        "multi_agent_efficiency": 0,
+        "scalability_factor": 0.0
+      },
+      "complexity_impact": {
+        "single_agent_avg_tokens": 202.89473684210526,
+        "multi_agent_avg_tokens": 0,
+        "complexity_overhead": -100.0
+      }
+    },
+    "cost_analysis": {
+      "single_agent": {
+        "cost_without_context": 0.063592,
+        "cost_with_context": 0.00771,
+        "savings_usd": 0.055881999999999994,
+        "savings_percentage": 87.87583343816831
+      },
+      "multi_agent": {
+        "cost_without_context": 0.0,
+        "cost_with_context": 0.0,
+        "savings_usd": 0.0,
+        "savings_percentage": 0
+      },
+      "total_savings": {
+        "usd": 0.055881999999999994,
+        "percentage": 87.87583343816831
+      }
+    },
+    "recommendations": {
+      "when_to_use_context_sharing": [
+        "✅ 单智能体场景显示 87.9% 的Token效率提升，推荐使用"
+      ],
+      "performance_optimization": [
+        "⚡ Context Sharing有效减少Token使用，提升响应效率"
+      ],
+      "cost_optimization": [
+        "💰 通过Context Sharing可显著降低API调用成本"
+      ],
+      "architecture_considerations": []
+    },
+    "scalability_analysis": {
+      "scaling_efficiency": 100.0,
+      "single_agent_baseline": 202.89473684210526,
+      "multi_agent_performance": 0,
+      "scalability_rating": "⭐⭐⭐⭐⭐ 优秀",
+      "recommendations": [
+        "🚀 Context Sharing展现出色的扩展性能，适合大规模部署"
+      ]
+    },
+    "comprehensive_chart": "comprehensive_analysis_20250806_222154.png"
+  },
+  "end_time": "2025-08-06T22:21:54.448562",
+  "total_duration": 9.324705
+}
