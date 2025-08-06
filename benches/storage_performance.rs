@@ -20,12 +20,12 @@ impl MockStorage {
 
     fn put(&mut self, key: &str, value: &[u8]) -> Result<(), &'static str> {
         self.data.insert(key.to_string(), value.to_vec());
-
+        
         // Update cache
         if self.cache.len() < self.cache_size_limit {
             self.cache.insert(key.to_string(), value.to_vec());
         }
-
+        
         Ok(())
     }
 
@@ -34,7 +34,7 @@ impl MockStorage {
         if let Some(value) = self.cache.get(key) {
             return Some(value.clone());
         }
-
+        
         // Fallback to main storage
         self.data.get(key).cloned()
     }
@@ -71,10 +71,10 @@ fn generate_test_data(count: usize) -> Vec<(String, Vec<u8>)> {
 
 fn bench_single_writes(c: &mut Criterion) {
     let mut group = c.benchmark_group("single_writes");
-
+    
     for &count in [100, 1000, 10000].iter() {
         let test_data = generate_test_data(count);
-
+        
         group.bench_with_input(
             BenchmarkId::new("record_count", count),
             &test_data,
@@ -89,16 +89,16 @@ fn bench_single_writes(c: &mut Criterion) {
             },
         );
     }
-
+    
     group.finish();
 }
 
 fn bench_batch_writes(c: &mut Criterion) {
     let mut group = c.benchmark_group("batch_writes");
-
+    
     for &count in [100, 1000, 10000].iter() {
         let test_data = generate_test_data(count);
-
+        
         group.bench_with_input(
             BenchmarkId::new("batch_size", count),
             &test_data,
@@ -111,22 +111,22 @@ fn bench_batch_writes(c: &mut Criterion) {
             },
         );
     }
-
+    
     group.finish();
 }
 
 fn bench_point_reads(c: &mut Criterion) {
     let mut group = c.benchmark_group("point_reads");
-
+    
     for &count in [100, 1000, 10000].iter() {
         let test_data = generate_test_data(count);
         let mut storage = MockStorage::new();
-
+        
         // Pre-populate storage
         for (key, value) in &test_data {
             storage.put(key, value).unwrap();
         }
-
+        
         group.bench_with_input(
             BenchmarkId::new("dataset_size", count),
             &test_data,
@@ -139,22 +139,22 @@ fn bench_point_reads(c: &mut Criterion) {
             },
         );
     }
-
+    
     group.finish();
 }
 
 fn bench_range_queries(c: &mut Criterion) {
     let mut group = c.benchmark_group("range_queries");
-
+    
     for &count in [1000, 5000, 10000].iter() {
         let test_data = generate_test_data(count);
         let mut storage = MockStorage::new();
-
+        
         // Pre-populate storage
         for (key, value) in &test_data {
             storage.put(key, value).unwrap();
         }
-
+        
         group.bench_with_input(
             BenchmarkId::new("dataset_size", count),
             &count,
@@ -167,30 +167,30 @@ fn bench_range_queries(c: &mut Criterion) {
             },
         );
     }
-
+    
     group.finish();
 }
 
 fn bench_mixed_workload(c: &mut Criterion) {
     let mut group = c.benchmark_group("mixed_workload");
-
+    
     let test_data = generate_test_data(1000);
     let mut storage = MockStorage::new();
-
+    
     // Pre-populate with some data
     for (key, value) in test_data.iter().take(500) {
         storage.put(key, value).unwrap();
     }
-
+    
     group.bench_function("read_write_mix", |b| {
         b.iter(|| {
             let mut local_storage = MockStorage::new();
-
+            
             // Copy existing data
             for (key, value) in storage.data.iter() {
                 local_storage.put(key, value).unwrap();
             }
-
+            
             // Mixed operations: 70% reads, 20% writes, 10% deletes
             for i in 0..100 {
                 match i % 10 {
@@ -212,11 +212,11 @@ fn bench_mixed_workload(c: &mut Criterion) {
                     }
                 }
             }
-
+            
             black_box(local_storage)
         })
     });
-
+    
     group.finish();
 }
 

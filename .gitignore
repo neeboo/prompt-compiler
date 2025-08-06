@@ -72,3 +72,6 @@ test_data/
 
 # env setting
 .env
+
+# logs
+*.logs

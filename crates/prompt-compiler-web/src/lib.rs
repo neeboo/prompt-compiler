@@ -61,6 +61,6 @@ async fn analyze_prompt(
     analysis.insert("intent_clarity".to_string(), 0.8);
     analysis.insert("context_relevance".to_string(), 0.7);
     analysis.insert("prompt_length".to_string(), payload.prompt.len() as f32);
-
+    
     Ok(Json(analysis))
 }

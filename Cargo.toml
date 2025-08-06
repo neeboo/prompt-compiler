@@ -8,7 +8,8 @@ members = [
     "crates/prompt-compiler-web",
     "crates/prompt-compiler-sdk",
     "crates/prompt-analyzer",
-    "crates/prompt-compiler-embeddings"
+    "crates/prompt-compiler-embeddings",
+    "crates/prompt-compiler-node"
 ]
 resolver = "2"
 
@@ -81,3 +82,4 @@ prompt-compiler-sdk = { path = "crates/prompt-compiler-sdk" }
 prompt-compiler-cli = { path = "crates/prompt-compiler-cli" }
 prompt-analyzer = { path = "crates/prompt-analyzer" }
 prompt-compiler-web = { path = "crates/prompt-compiler-web" }
+prompt-compiler-node = { path = "crates/prompt-compiler-node" }

@@ -25,7 +25,7 @@ impl SimpleTextEncoder {
             text.matches("请").count() as f32,
             text.matches("麻烦").count() as f32,
 
-            // 具体化程度
+            // 具体化程度  
             text.matches("详细").count() as f32,
             text.matches("具体").count() as f32,
             text.matches("清楚").count() as f32,
@@ -69,6 +69,6 @@ impl SimpleTextEncoder {
     }
 
     pub fn task_feature_dim(&self) -> usize {
-        8 // 对应encode_task中的特征数量
+        8 // 对应encode_task中的特征数量  
     }
 }

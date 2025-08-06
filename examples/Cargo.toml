@@ -1,0 +1,11 @@
+[package]
+name = "paper_compliance_verification"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "paper_compliance_verification"
+path = "paper_compliance_verification.rs"
+
+[dependencies]
+nalgebra = "0.32"

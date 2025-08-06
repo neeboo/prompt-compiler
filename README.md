@@ -131,6 +131,42 @@ See [`examples/README.md`](./examples/README.md) for detailed usage instructions
 
 We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
 
+## 🗓️ Roadmap & TODO
+
+### Priority 2: Theoretical Validation Enhancements
+- [ ] **Hyperparameter Sensitivity Analysis**
+  - Systematic testing of learning rate variations (0.001 - 1.0)
+  - Regularization strength impact analysis (0.0 - 0.1)
+  - Multi-head attention configuration optimization
+  - Convergence behavior under different parameter combinations
+  - Statistical significance testing for parameter effects
+
+### Priority 3: Engineering Optimizations
+- [ ] **Batch Processing Support**
+  - Vectorized weight update operations
+  - Parallel context processing for multiple queries
+  - Memory-efficient batch handling for large datasets
+  - Streaming API for continuous processing
+
+- [ ] **GPU Acceleration**
+  - CUDA/OpenCL kernels for matrix operations
+  - GPU-accelerated softmax and attention computation
+  - Memory transfer optimization between CPU/GPU
+  - Benchmark comparisons: CPU vs GPU performance
+
+- [ ] **Memory Optimization**
+  - Smart caching strategies for frequently accessed contexts
+  - Memory pool management for large embeddings
+  - Lazy loading for historical weight updates
+  - Memory profiling and leak detection tools
+  - Zero-copy operations where possible
+
+### Future Enhancements
+- [ ] **Multi-Agent Context Sharing System**
+- [ ] **Distributed Computing Support**
+- [ ] **Real-time Monitoring Dashboard**
+- [ ] **Integration with Popular ML Frameworks**
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
