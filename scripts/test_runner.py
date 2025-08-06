@@ -82,6 +82,10 @@ class TestRunner:
             try:
                 print("\n📊 Generating Comprehensive Analysis...")
 
+                # 🔍 调试：打印传递给分析器的���据类型
+                print(f"🔍 Single agent test type: {results['single_agent_results'].get('test_type', 'unknown')}")
+                print(f"🔍 Multi agent test type: {results['multi_agent_results'].get('test_type', 'unknown')}")
+
                 analysis = self.data_analyzer.analyze_comprehensive_results(
                     results["single_agent_results"],
                     results["multi_agent_results"]

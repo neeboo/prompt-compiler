@@ -4,6 +4,7 @@
 比较开启和关闭Context Sharing在多智能体场景下的性能差异
 """
 
+import os
 import json
 import time
 from typing import List, Dict, Any
@@ -13,19 +14,26 @@ from utils.chart_generator import ChartGenerator
 
 
 class MultiAgentTester:
-    def __init__(self, config_path: str = "configs/multi_agent_config.json"):
+    def __init__(self, config_path: str = None):
+        if config_path is None:
+            # 使用脚本所在目录的相对路径
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            config_path = os.path.join(script_dir, "configs", "multi_agent_config.json")
+
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = json.load(f)
 
         self.client = PCNodeClient(self.config['test_config']['base_url'])
         self.chart_generator = ChartGenerator()
 
-    def test_without_context_sharing(self) -> Dict[str, List[ConversationResult]]:
+    def test_without_context_sharing(self) -> Dict[str, Any]:
         """测试不开启Context Sharing的多智能体场景"""
         print("🔍 Testing Multi-Agent WITHOUT Context Sharing...")
 
         conversation = self.config['conversation_scenarios']['enterprise_project']
         agent_results = {}
+        # 🔍 新增：记录自然对话顺序的数据
+        conversation_timeline = []
 
         # 记录所有对话历史，每个智能体都需要完整历史
         full_conversation_history = []
@@ -38,6 +46,10 @@ class MultiAgentTester:
 
             # 每次都传递完整的对话历史
             full_conversation_history.append({"role": "user", "content": message})
+
+            # 🔍 调试信息：打印每次传递的消息数量和总长度
+            total_chars = sum(len(msg['content']) for msg in full_conversation_history)
+            print(f"      ��� 发送 {len(full_conversation_history)} 条消息，总长度: {total_chars} 字符")
 
             result = self.client.chat_completion(
                 messages=full_conversation_history.copy(),
@@ -52,20 +64,39 @@ class MultiAgentTester:
                 agent_results[agent_id] = []
             agent_results[agent_id].append(result)
 
+            # 🔍 新增：记录到对话时间线
+            conversation_timeline.append({
+                "global_turn": i + 1,
+                "agent_id": agent_id,
+                "agent_name": self.config['agents'][agent_id]['name'],
+                "tokens": result.tokens,
+                "response_time": result.response_time,
+                "compression_ratio": result.compression_ratio,
+                "context_size": result.context_size,
+                "messages_sent": len(full_conversation_history),
+                "total_chars": total_chars
+            })
+
             # 将回复添加到历史中
             if result.content:
                 full_conversation_history.append({"role": "assistant", "content": result.content})
+                # 🔍 调试信息：打印添加回复后的消息数量
+                print(f"      ✅ 收到回复，添加后共 {len(full_conversation_history)} 条消息，tokens: {result.tokens}")
+            else:
+                print(f"      ❌ 回复为��！没有添加到历史记录中")
 
             time.sleep(0.1)
 
-        return agent_results
+        return {"agent_results": agent_results, "conversation_timeline": conversation_timeline}
 
-    def test_with_context_sharing(self) -> Dict[str, List[ConversationResult]]:
+    def test_with_context_sharing(self) -> Dict[str, Any]:
         """测试开启Context Sharing的多智能体场景"""
         print("🔍 Testing Multi-Agent WITH Context Sharing...")
 
         conversation = self.config['conversation_scenarios']['enterprise_project']
         agent_results = {}
+        # 🔍 新增：记录自然对话顺序的数据
+        conversation_timeline = []
 
         for i, turn in enumerate(conversation):
             agent_id = turn['agent']
@@ -88,9 +119,22 @@ class MultiAgentTester:
                 agent_results[agent_id] = []
             agent_results[agent_id].append(result)
 
+            # 🔍 新增：记录到对话时间线
+            conversation_timeline.append({
+                "global_turn": i + 1,
+                "agent_id": agent_id,
+                "agent_name": self.config['agents'][agent_id]['name'],
+                "tokens": result.tokens,
+                "response_time": result.response_time,
+                "compression_ratio": result.compression_ratio,
+                "context_size": result.context_size,
+                "messages_sent": 1,  # Context sharing 只发送1条消息
+                "total_chars": len(message)
+            })
+
             time.sleep(0.1)
 
-        return agent_results
+        return {"agent_results": agent_results, "conversation_timeline": conversation_timeline}
 
     def run_comparison_test(self) -> Dict[str, Any]:
         """运行多智能体对比测试"""
@@ -109,15 +153,33 @@ class MultiAgentTester:
 
         total_time = time.time() - start_time
 
+        # 提取agent_results和conversation_timeline
+        agent_results_without = results_without["agent_results"]
+        agent_results_with = results_with["agent_results"]
+        timeline_without = results_without["conversation_timeline"]
+        timeline_with = results_with["conversation_timeline"]
+
         # 将多智能体结果合并为单一列表进行对比
+        # 🔍 修正：按照自然对话顺序合并，而不是按agent分组
         all_results_without = []
         all_results_with = []
 
-        for agent_id in results_without:
-            all_results_without.extend(results_without[agent_id])
+        # 从对话���间线中按照自然顺序提取ConversationResult对象
+        for turn_data in timeline_without:
+            agent_id = turn_data["agent_id"]
+            global_turn = turn_data["global_turn"]
+            # 找到对应agent在该���次的ConversationResult
+            agent_turn_index = sum(1 for t in timeline_without[:global_turn-1] if t["agent_id"] == agent_id)
+            result = agent_results_without[agent_id][agent_turn_index]
+            all_results_without.append(result)
 
-        for agent_id in results_with:
-            all_results_with.extend(results_with[agent_id])
+        for turn_data in timeline_with:
+            agent_id = turn_data["agent_id"]
+            global_turn = turn_data["global_turn"]
+            # 找到对应agent在该轮次的ConversationResult
+            agent_turn_index = sum(1 for t in timeline_with[:global_turn-1] if t["agent_id"] == agent_id)
+            result = agent_results_with[agent_id][agent_turn_index]
+            all_results_with.append(result)
 
         # 计算整体性能指标对比
         overall_comparison = MetricsCalculator.compare_scenarios(
@@ -142,18 +204,18 @@ class MultiAgentTester:
         for agent_id in self.config['agents']:
             agent_name = self.config['agents'][agent_id]['name']
 
-            if agent_id in results_without and agent_id in results_with:
+            if agent_id in agent_results_without and agent_id in agent_results_with:
                 agent_comparison = MetricsCalculator.compare_scenarios(
-                    results_without[agent_id],
-                    results_with[agent_id],
+                    agent_results_without[agent_id],
+                    agent_results_with[agent_id],
                     f"{agent_name} (Without)",
                     f"{agent_name} (With)"
                 )
                 agent_metrics[agent_id] = {
                     "name": agent_name,
                     "comparison": agent_comparison,
-                    "turns_without": len(results_without[agent_id]),
-                    "turns_with": len(results_with[agent_id])
+                    "turns_without": len(agent_results_without[agent_id]),
+                    "turns_with": len(agent_results_with[agent_id])
                 }
 
         # 准备返回结果
@@ -167,6 +229,11 @@ class MultiAgentTester:
             "chart_paths": {
                 "overall_comparison": overall_chart_path
             },
+            # 🔍 新��：包含对话时间线数据
+            "conversation_timelines": {
+                "without_context_sharing": timeline_without,
+                "with_context_sharing": timeline_with
+            },
             "raw_results": {
                 "without_context_sharing": {
                     agent_id: [
@@ -179,7 +246,7 @@ class MultiAgentTester:
                         }
                         for i, r in enumerate(results)
                     ]
-                    for agent_id, results in results_without.items()
+                    for agent_id, results in agent_results_without.items()
                 },
                 "with_context_sharing": {
                     agent_id: [
@@ -192,7 +259,7 @@ class MultiAgentTester:
                         }
                         for i, r in enumerate(results)
                     ]
-                    for agent_id, results in results_with.items()
+                    for agent_id, results in agent_results_with.items()
                 }
             }
         }

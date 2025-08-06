@@ -25,11 +25,21 @@ class TestDataAnalyzer:
 
         print("📊 Analyzing comprehensive test results...")
 
+        # 🔍 添加调试：确认传入的参数类型
+        print(f"🔍 Received single_agent type: {single_agent_results.get('test_type', 'unknown')}")
+        print(f"🔍 Received multi_agent type: {multi_agent_results.get('test_type', 'unknown')}")
+
         # 提取关键指标
+        print("🔍 Extracting single agent summary...")
+        single_agent_summary = self._extract_summary_metrics(single_agent_results)
+
+        print("🔍 Extracting multi agent summary...")
+        multi_agent_summary = self._extract_summary_metrics(multi_agent_results)
+
         analysis = {
             "test_summary": {
-                "single_agent": self._extract_summary_metrics(single_agent_results),
-                "multi_agent": self._extract_summary_metrics(multi_agent_results)
+                "single_agent": single_agent_summary,
+                "multi_agent": multi_agent_summary
             },
             "performance_insights": self._generate_performance_insights(
                 single_agent_results, multi_agent_results
@@ -55,23 +65,52 @@ class TestDataAnalyzer:
 
     def _extract_summary_metrics(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
         """提取测试结果的关键指标"""
-        if not test_results or "comparison" not in test_results:
-            return {}
+        if not test_results:
+            return {
+                "without_context_sharing": {"avg_tokens": 0, "total_tokens": 0, "avg_response_time": 0},
+                "with_context_sharing": {"avg_tokens": 0, "total_tokens": 0, "avg_response_time": 0},
+                "improvements": {"token_efficiency": 0, "token_savings": 0, "response_time_change": 0}
+            }
 
-        comparison = test_results["comparison"]
-        scenarios = comparison["scenarios"]
-        improvements = comparison.get("improvements", {})  # 使用get方法安全访问
+        # 🔍 处理不同类型的测试结果数据结构
+        test_type = test_results.get("test_type", "unknown")
+        print(f"🔍 Processing {test_type}")
+
+        # 根据测试类型选择正确的数据字段
+        if test_type == "multi_agent_comparison":
+            # 多智能体使用 overall_comparison 字段
+            comparison = test_results.get("overall_comparison", {})
+        else:
+            # 单智能体使用 comparison 字段
+            comparison = test_results.get("comparison", {})
+
+        if not comparison:
+            return {
+                "without_context_sharing": {"avg_tokens": 0, "total_tokens": 0, "avg_response_time": 0},
+                "with_context_sharing": {"avg_tokens": 0, "total_tokens": 0, "avg_response_time": 0},
+                "improvements": {"token_efficiency": 0, "token_savings": 0, "response_time_change": 0}
+            }
+
+        scenarios = comparison.get("scenarios", {})
+        improvements = comparison.get("improvements", {})
+
+        print(f"🔍 {test_type} - scenarios keys: {list(scenarios.keys())}")
+        print(f"🔍 {test_type} - token_efficiency: {improvements.get('token_efficiency', 0):.1f}%")
+
+        # 提取场景数据
+        without_data = scenarios.get("Without Context Sharing", {})
+        with_data = scenarios.get("With Context Sharing", {})
 
         return {
             "without_context_sharing": {
-                "avg_tokens": scenarios.get("Without Context Sharing", {}).get("avg_tokens", 0),
-                "total_tokens": scenarios.get("Without Context Sharing", {}).get("total_tokens", 0),
-                "avg_response_time": scenarios.get("Without Context Sharing", {}).get("avg_response_time", 0)
+                "avg_tokens": without_data.get("avg_tokens", 0),
+                "total_tokens": without_data.get("total_tokens", 0),
+                "avg_response_time": without_data.get("avg_response_time", 0)
             },
             "with_context_sharing": {
-                "avg_tokens": scenarios.get("With Context Sharing", {}).get("avg_tokens", 0),
-                "total_tokens": scenarios.get("With Context Sharing", {}).get("total_tokens", 0),
-                "avg_response_time": scenarios.get("With Context Sharing", {}).get("avg_response_time", 0)
+                "avg_tokens": with_data.get("avg_tokens", 0),
+                "total_tokens": with_data.get("total_tokens", 0),
+                "avg_response_time": with_data.get("avg_response_time", 0)
             },
             "improvements": {
                 "token_efficiency": improvements.get("token_efficiency", 0),
@@ -124,40 +163,49 @@ class TestDataAnalyzer:
         single_agent_results: Dict[str, Any],
         multi_agent_results: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """计算综合成本分析"""
-
-        cost_per_1k = 0.002  # GPT-3.5-turbo pricing
+        """计算综合成本分析 - 基于Token节省量"""
 
         single_summary = self._extract_summary_metrics(single_agent_results)
         multi_summary = self._extract_summary_metrics(multi_agent_results)
 
-        # 单智能体成本
-        single_cost_without = (single_summary.get("without_context_sharing", {}).get("total_tokens", 0) / 1000) * cost_per_1k
-        single_cost_with = (single_summary.get("with_context_sharing", {}).get("total_tokens", 0) / 1000) * cost_per_1k
-        single_savings = single_cost_without - single_cost_with
+        # 单智能体Token节省
+        single_tokens_without = single_summary.get("without_context_sharing", {}).get("total_tokens", 0)
+        single_tokens_with = single_summary.get("with_context_sharing", {}).get("total_tokens", 0)
+        single_token_savings = single_tokens_without - single_tokens_with
 
-        # 多智能体成本
-        multi_cost_without = (multi_summary.get("without_context_sharing", {}).get("total_tokens", 0) / 1000) * cost_per_1k
-        multi_cost_with = (multi_summary.get("with_context_sharing", {}).get("total_tokens", 0) / 1000) * cost_per_1k
-        multi_savings = multi_cost_without - multi_cost_with
+        # 多智能体Token节省
+        multi_tokens_without = multi_summary.get("without_context_sharing", {}).get("total_tokens", 0)
+        multi_tokens_with = multi_summary.get("with_context_sharing", {}).get("total_tokens", 0)
+        multi_token_savings = multi_tokens_without - multi_tokens_with
+
+        # 计算每轮Token节省
+        single_rounds = 19  # 单智能体测试轮数
+        multi_rounds = 20   # 多智能体测试轮数
+
+        single_per_round_token_savings = single_token_savings / single_rounds if single_rounds > 0 else 0
+        multi_per_round_token_savings = multi_token_savings / multi_rounds if multi_rounds > 0 else 0
+        average_per_round_token_savings = (single_per_round_token_savings + multi_per_round_token_savings) / 2
 
         return {
             "single_agent": {
-                "cost_without_context": single_cost_without,
-                "cost_with_context": single_cost_with,
-                "savings_usd": single_savings,
-                "savings_percentage": (single_savings / single_cost_without * 100) if single_cost_without > 0 else 0
+                "tokens_without_context": single_tokens_without,
+                "tokens_with_context": single_tokens_with,
+                "token_savings": single_token_savings,
+                "savings_percentage": (single_token_savings / single_tokens_without * 100) if single_tokens_without > 0 else 0,
+                "per_round_token_savings": single_per_round_token_savings
             },
             "multi_agent": {
-                "cost_without_context": multi_cost_without,
-                "cost_with_context": multi_cost_with,
-                "savings_usd": multi_savings,
-                "savings_percentage": (multi_savings / multi_cost_without * 100) if multi_cost_without > 0 else 0
+                "tokens_without_context": multi_tokens_without,
+                "tokens_with_context": multi_tokens_with,
+                "token_savings": multi_token_savings,
+                "savings_percentage": (multi_token_savings / multi_tokens_without * 100) if multi_tokens_without > 0 else 0,
+                "per_round_token_savings": multi_per_round_token_savings
             },
             "total_savings": {
-                "usd": single_savings + multi_savings,
-                "percentage": ((single_savings + multi_savings) / (single_cost_without + multi_cost_without) * 100) if (single_cost_without + multi_cost_without) > 0 else 0
-            }
+                "tokens": single_token_savings + multi_token_savings,
+                "percentage": ((single_token_savings + multi_token_savings) / (single_tokens_without + multi_tokens_without) * 100) if (single_tokens_without + multi_tokens_without) > 0 else 0
+            },
+            "average_per_round_token_savings": average_per_round_token_savings
         }
 
     def _generate_recommendations(
@@ -188,7 +236,7 @@ class TestDataAnalyzer:
 
         if multi_efficiency > 30:
             recommendations["when_to_use_context_sharing"].append(
-                f"✅ 多智能体场景显示 {multi_efficiency:.1f}% 的Token效率提升，强烈推荐使用"
+                f"✅ 多智能体场景显示 {multi_efficiency:.1f}% 的Token效率提升���强烈推荐使用"
             )
 
         if multi_efficiency > single_efficiency * 1.2:
@@ -299,12 +347,14 @@ class TestDataAnalyzer:
 ### 单智能体测试结果
 - **Token效率提升**: {analysis['test_summary']['single_agent'].get('improvements', {}).get('token_efficiency', 0):.1f}%
 - **Token节省**: {analysis['test_summary']['single_agent'].get('improvements', {}).get('token_savings', 0)} tokens
-- **响应时间变化**: {analysis['test_summary']['single_agent'].get('improvements', {}).get('response_time_change', 0):.1f}%
+
+![单智能体性能对比](images/single_agent_comparison.png)
 
 ### 多智能体测试结果
 - **Token效率提升**: {analysis['test_summary']['multi_agent'].get('improvements', {}).get('token_efficiency', 0):.1f}%
 - **Token节省**: {analysis['test_summary']['multi_agent'].get('improvements', {}).get('token_savings', 0)} tokens
-- **响应时间变化**: {analysis['test_summary']['multi_agent'].get('improvements', {}).get('response_time_change', 0):.1f}%
+
+![多智能体性能对比](images/multi_agent_comparison.png)
 
 ## 💡 性能洞察
 
@@ -313,56 +363,64 @@ class TestDataAnalyzer:
 - **多智能体效率**: {analysis['performance_insights']['context_sharing_effectiveness']['multi_agent_efficiency']:.1f}%
 - **可扩展性因子**: {analysis['performance_insights']['context_sharing_effectiveness']['scalability_factor']:.2f}
 
-## 💰 成本分析
+### 复杂度影响
+- **单智能体平均Token**: {analysis['performance_insights']['complexity_impact']['single_agent_avg_tokens']:.0f} tokens
+- **多智能体平均Token**: {analysis['performance_insights']['complexity_impact']['multi_agent_avg_tokens']:.0f} tokens
+- **复杂度开销**: {analysis['performance_insights']['complexity_impact']['complexity_overhead']:.1f}%
+
+## 💰 Token节省分析
 
 ### 单智能体场景
-- **不使用Context Sharing**: ${analysis['cost_analysis']['single_agent']['cost_without_context']:.4f}
-- **使用Context Sharing**: ${analysis['cost_analysis']['single_agent']['cost_with_context']:.4f}
-- **节省**: ${analysis['cost_analysis']['single_agent']['savings_usd']:.4f} ({analysis['cost_analysis']['single_agent']['savings_percentage']:.1f}%)
+- **不使用Context Sharing**: {analysis['cost_analysis']['single_agent']['tokens_without_context']:,.0f} tokens
+- **使用Context Sharing**: {analysis['cost_analysis']['single_agent']['tokens_with_context']:,.0f} tokens
+- **节省**: {analysis['cost_analysis']['single_agent']['token_savings']:,.0f} tokens ({analysis['cost_analysis']['single_agent']['savings_percentage']:.1f}%)
+- **每轮节省**: {analysis['cost_analysis']['single_agent']['per_round_token_savings']:.0f} tokens
 
 ### 多智能体场景
-- **不使用Context Sharing**: ${analysis['cost_analysis']['multi_agent']['cost_without_context']:.4f}
-- **使用Context Sharing**: ${analysis['cost_analysis']['multi_agent']['cost_with_context']:.4f}
-- **节省**: ${analysis['cost_analysis']['multi_agent']['savings_usd']:.4f} ({analysis['cost_analysis']['multi_agent']['savings_percentage']:.1f}%)
+- **不使用Context Sharing**: {analysis['cost_analysis']['multi_agent']['tokens_without_context']:,.0f} tokens
+- **使用Context Sharing**: {analysis['cost_analysis']['multi_agent']['tokens_with_context']:,.0f} tokens
+- **节省**: {analysis['cost_analysis']['multi_agent']['token_savings']:,.0f} tokens ({analysis['cost_analysis']['multi_agent']['savings_percentage']:.1f}%)
+- **每轮节省**: {analysis['cost_analysis']['multi_agent']['per_round_token_savings']:.0f} tokens
+
+### 总体节省
+- **总Token节省**: {analysis['cost_analysis']['total_savings']['tokens']:,.0f} tokens
+- **总节省比例**: {analysis['cost_analysis']['total_savings']['percentage']:.1f}%
+- **平均每轮节省**: {analysis['cost_analysis']['average_per_round_token_savings']:.0f} tokens
 
 ## 🎯 使用建议
 
 ### 何时使用Context Sharing
 """
 
+        # 添加建议内容
         for recommendation in analysis['recommendations']['when_to_use_context_sharing']:
+            content += f"- {recommendation}\n"
+
+        content += "\n### 性能优化建议\n"
+        for recommendation in analysis['recommendations']['performance_optimization']:
+            content += f"- {recommendation}\n"
+
+        content += "\n### 成本优化建议\n"
+        for recommendation in analysis['recommendations']['cost_optimization']:
             content += f"- {recommendation}\n"
 
         content += "\n### 架构考虑\n"
         for recommendation in analysis['recommendations']['architecture_considerations']:
             content += f"- {recommendation}\n"
 
+        # 添加总结，使用tokens表示
         content += f"""
-## 📈 可扩展性分析
+## 📋 总结
 
-- **扩展效率**: {analysis['scalability_analysis']['scaling_efficiency']:.1f}%
-- **可扩展性评级**: {analysis['scalability_analysis']['scalability_rating']}
+本次测试验证了PC Node在Context Sharing方面的性能表现：
 
-### 扩展建议
-"""
-
-        for recommendation in analysis['scalability_analysis']['recommendations']:
-            content += f"- {recommendation}\n"
-
-        content += f"""
-## 🏆 总结
-
-基于测试结果，PC Node的Context Sharing功能在以下方面表现优异：
-
-1. **显著的Token效率提升** - 在不同场景下都实现了可观的Token节省
-2. **良好的多智能体支持** - 在复杂的多智能体环境中表现更加出色
-3. **成本效益明显** - 能够有效降低API调用成本
-4. **架构优势突出** - 为协作型AI应用提供了优秀的基础设施
-
-建议在需要多轮对话、多智能体协作的场景中优先考虑使用PC Node的Context Sharing功能。
+1. **单智能体场景**: Context Sharing带来了{analysis['test_summary']['single_agent'].get('improvements', {}).get('token_efficiency', 0):.1f}%的Token效率提升
+2. **多智能体场景**: Context Sharing带来了{analysis['test_summary']['multi_agent'].get('improvements', {}).get('token_efficiency', 0):.1f}%的Token效率提升
+3. **Token节省**: 平均每轮对话节省{analysis['cost_analysis']['average_per_round_token_savings']:.0f} tokens
+4. **规模效应**: 每1000轮对话节省{analysis['cost_analysis']['average_per_round_token_savings'] * 1000:.0f} tokens
 
 ---
-*此报告由PC Node自动化测试系统生成*
+*报告由PC Node自动生成 | 数据来源: 综合性能测试*
 """
 
         return content

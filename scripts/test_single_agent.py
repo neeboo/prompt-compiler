@@ -4,16 +4,23 @@
 比较开启和关闭Context Sharing的性能差异
 """
 
+import os
 import json
 import time
 from typing import List, Dict, Any
+from datetime import datetime
 from utils.pc_client import PCNodeClient, ConversationResult
 from utils.performance_metrics import MetricsCalculator
 from utils.chart_generator import ChartGenerator
 
 
 class SingleAgentTester:
-    def __init__(self, config_path: str = "configs/single_agent_config.json"):
+    def __init__(self, config_path: str = None):
+        if config_path is None:
+            # 使用脚本所在目录的相对路径
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            config_path = os.path.join(script_dir, "configs", "single_agent_config.json")
+
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = json.load(f)
 

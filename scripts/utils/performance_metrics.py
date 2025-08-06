@@ -74,15 +74,22 @@ class MetricsCalculator:
         metrics_a = MetricsCalculator.calculate_metrics(scenario_a)
         metrics_b = MetricsCalculator.calculate_metrics(scenario_b)
 
-        # 计算改进百分比
-        token_improvement = ((metrics_a.avg_tokens - metrics_b.avg_tokens) / metrics_a.avg_tokens * 100) if metrics_a.avg_tokens > 0 else 0
+        # 🔍 修正：直接用总token数进行对比，更直观
+        total_tokens_a = sum(r.tokens for r in scenario_a if r.tokens > 0)
+        total_tokens_b = sum(r.tokens for r in scenario_b if r.tokens > 0)
+
+        # 计算改进百分比 - 基于总token消耗
+        token_improvement = ((total_tokens_a - total_tokens_b) / total_tokens_a * 100) if total_tokens_a > 0 else 0
+        token_savings = total_tokens_a - total_tokens_b
+
+        # 响应时间对比
         time_improvement = ((metrics_a.avg_response_time - metrics_b.avg_response_time) / metrics_a.avg_response_time * 100) if metrics_a.avg_response_time > 0 else 0
 
         return {
             "scenarios": {
                 scenario_a_name: {
                     "avg_tokens": metrics_a.avg_tokens,
-                    "total_tokens": metrics_a.total_tokens,
+                    "total_tokens": total_tokens_a,
                     "avg_response_time": metrics_a.avg_response_time,
                     "token_growth_rate": metrics_a.token_growth_rate,
                     "compression_efficiency": metrics_a.compression_efficiency,
@@ -90,7 +97,7 @@ class MetricsCalculator:
                 },
                 scenario_b_name: {
                     "avg_tokens": metrics_b.avg_tokens,
-                    "total_tokens": metrics_b.total_tokens,
+                    "total_tokens": total_tokens_b,
                     "avg_response_time": metrics_b.avg_response_time,
                     "token_growth_rate": metrics_b.token_growth_rate,
                     "compression_efficiency": metrics_b.compression_efficiency,
@@ -100,7 +107,7 @@ class MetricsCalculator:
             "improvements": {
                 "token_efficiency": token_improvement,
                 "response_time": time_improvement,
-                "token_savings": metrics_a.total_tokens - metrics_b.total_tokens
+                "token_savings": token_savings
             },
             "summary": {
                 "better_scenario": scenario_b_name if token_improvement > 0 else scenario_a_name,
