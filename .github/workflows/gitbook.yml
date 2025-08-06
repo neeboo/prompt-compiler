@@ -87,8 +87,8 @@ jobs:
         * **Performance & Benchmarks**
           * [PC Node Performance Report](pc_node_performance_report.md)
           * [PC Node 性能测试报告](pc_node_performance_report.zh.md)
-          * [Performance Benchmarks](../benches/README.md)
-        * [Examples](../examples/README.md)
+        * **Examples**
+          * [Examples Overview](https://github.com/neeboo/prompt-compiler/tree/main/examples)
         EOF
 
     - name: Setup Pages
