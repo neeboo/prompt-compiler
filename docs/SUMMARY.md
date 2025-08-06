@@ -20,6 +20,8 @@
 * [多Agent上下文共享](use_cases/multi_agent_sharing.cn.md)
 
 ## Performance & Benchmarks
+* [PC Node Performance Report](pc_node_performance_report.md)
+* [PC Node 性能测试报告](pc_node_performance_report.zh.md)
 * [Performance Benchmarks](../benches/README.md)
 
 ## Examples
