@@ -4,9 +4,74 @@ use tracing::{info, debug, warn}; // 添加warn导入
 use prompt_compiler_embeddings::EmbeddingProvider;
 use prompt_compiler_weights::{ImplicitDynamics, DynamicsConfig}; // 添加DynamicsConfig导入
 use regex; // 添加regex依赖
+use serde::{Deserialize, Serialize}; // 添加Azure API需要的序列化支持
+use reqwest; // 添加HTTP客户端
 
 use crate::{ChatCompletionRequest, ChatCompletionResponse, ChatMessage, ProcessedRequest};
 use crate::storage::NodeStorage;
+
+// Azure Text Analytics API 数据结构
+#[derive(Debug, Serialize)]
+struct AzureNerRequest {
+    #[serde(rename = "analysisInput")]
+    analysis_input: AzureAnalysisInput,
+    #[serde(rename = "tasks")]
+    tasks: Vec<AzureTask>,
+}
+
+#[derive(Debug, Serialize)]
+struct AzureAnalysisInput {
+    documents: Vec<AzureDocument>,
+}
+
+#[derive(Debug, Serialize)]
+struct AzureDocument {
+    id: String,
+    language: String,
+    text: String,
+}
+
+#[derive(Debug, Serialize)]
+struct AzureTask {
+    kind: String,
+    #[serde(rename = "taskName")]
+    task_name: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct AzureNerResponse {
+    tasks: AzureTasks,
+}
+
+#[derive(Debug, Deserialize)]
+struct AzureTasks {
+    items: Vec<AzureTaskItem>,
+}
+
+#[derive(Debug, Deserialize)]
+struct AzureTaskItem {
+    results: AzureResults,
+}
+
+#[derive(Debug, Deserialize)]
+struct AzureResults {
+    documents: Vec<AzureResultDocument>,
+}
+
+#[derive(Debug, Deserialize)]
+struct AzureResultDocument {
+    entities: Vec<AzureEntity>,
+}
+
+#[derive(Debug, Deserialize)]
+struct AzureEntity {
+    text: String,
+    category: String,
+    #[serde(rename = "subcategory")]
+    subcategory: Option<String>,
+    #[serde(rename = "confidenceScore")]
+    confidence_score: f32,
+}
 
 pub struct ContextEngine {
     embedding_provider: Mutex<EmbeddingProvider>, // 用Mutex包装
@@ -40,6 +105,291 @@ impl ContextEngine {
         })
     }
 
+    // 🔧 简化版本：Azure Text Analytics NER 调用（带更好的错误处理）
+    async fn call_azure_ner(&self, texts: &[String]) -> Result<Vec<AzureEntity>> {
+        // 🔧 首先检查环境变量是否配置
+        let endpoint = match std::env::var("AZURE_TEXT_ANALYTICS_ENDPOINT") {
+            Ok(val) if !val.is_empty() => val,
+            _ => {
+                debug!("Azure Text Analytics endpoint not configured, skipping NER");
+                return Err(anyhow::anyhow!("Azure endpoint not configured"));
+            }
+        };
+
+        let api_key = match std::env::var("AZURE_TEXT_ANALYTICS_KEY") {
+            Ok(val) if !val.is_empty() => val,
+            _ => {
+                debug!("Azure Text Analytics key not configured, skipping NER");
+                return Err(anyhow::anyhow!("Azure key not configured"));
+            }
+        };
+
+        // 🔧 使用更兼容的 REST API 格式
+        // 参考：https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/how-tos/text-analytics-how-to-entity-linking
+        #[derive(Serialize)]
+        struct SimpleDocument {
+            id: String,
+            text: String,
+            language: String,
+        }
+
+        #[derive(Serialize)]
+        struct SimpleRequest {
+            documents: Vec<SimpleDocument>,
+        }
+
+        let documents: Vec<SimpleDocument> = texts
+            .iter()
+            .enumerate()
+            .map(|(i, text)| SimpleDocument {
+                id: format!("doc_{}", i),
+                text: text.clone(),
+                language: "en".to_string(),
+            })
+            .collect();
+
+        let request = SimpleRequest { documents };
+
+        let client = reqwest::Client::new();
+        // 🔧 使用稳定的 v3.1 API
+        let url = format!("{}/text/analytics/v3.1/entities/recognition/general", endpoint.trim_end_matches('/'));
+
+        debug!("Calling Azure Text Analytics v3.1: {}", url);
+
+        let response = client
+            .post(&url)
+            .header("Ocp-Apim-Subscription-Key", &api_key)
+            .header("Content-Type", "application/json")
+            .json(&request)
+            .timeout(std::time::Duration::from_secs(10)) // 🔧 添加超时
+            .send()
+            .await?;
+
+        if !response.status().is_success() {
+            let status_code = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            warn!("Azure API error: {} - {}", status_code, &error_text[..std::cmp::min(200, error_text.len())]);
+            return Err(anyhow::anyhow!("Azure API error: {}", status_code));
+        }
+
+        // 🔧 ���化的响应解析
+        #[derive(Deserialize)]
+        struct SimpleResponse {
+            documents: Vec<SimpleDocumentResponse>,
+        }
+
+        #[derive(Deserialize)]
+        struct SimpleDocumentResponse {
+            entities: Vec<AzureEntity>,
+        }
+
+        let azure_response: SimpleResponse = response.json().await
+            .map_err(|e| anyhow::anyhow!("Failed to parse Azure response: {}", e))?;
+
+        // 提取所有实体
+        let mut all_entities = Vec::new();
+        for document in azure_response.documents {
+            all_entities.extend(document.entities);
+        }
+
+        debug!("Azure NER found {} entities", all_entities.len());
+        Ok(all_entities)
+    }
+
+    // 🔧 新增：使用 Azure NER 增强的综合信息提取
+    async fn extract_comprehensive_key_information_with_ner(&self, contexts: &[SimilarContext]) -> Result<Vec<String>> {
+        // 准备文本用于 NER 分析
+        let texts: Vec<String> = contexts.iter()
+            .take(3)  // 限制处理的上下文数量以控制成本
+            .map(|ctx| ctx.content.clone())
+            .collect();
+
+        if texts.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let mut key_info = Vec::new();
+
+        // 🔧 明确日志：显示是否尝试使用Azure NER
+        info!("🔍 Attempting to use Azure NER for comprehensive key information extraction...");
+
+        // 尝试调用 Azure NER
+        match self.call_azure_ner(&texts).await {
+            Ok(entities) => {
+                info!("✅ SUCCESS: Azure NER extracted {} entities successfully!", entities.len());
+                debug!("Azure NER entities: {:?}", entities.iter().map(|e| &e.text).collect::<Vec<_>>());
+
+                // 将 Azure 实体转换为业务相关的关键信息
+                for entity in entities {
+                    if entity.confidence_score >= 0.7 {  // 只保留高置信度的实体
+                        let key_item = self.convert_azure_entity_to_business_info(&entity);
+                        if !key_item.is_empty() && !key_info.contains(&key_item) {
+                            key_info.push(key_item);
+                        }
+                    }
+                }
+
+                info!("📊 Azure NER result: {} high-confidence business entities extracted", key_info.len());
+
+                // 如果 NER 结果不够丰富，补充硬编码的提取结果
+                if key_info.len() < 3 {
+                    info!("📝 Azure NER results insufficient, supplementing with local extraction...");
+                    let fallback_info = self.extract_comprehensive_key_information(contexts);
+                    for item in fallback_info {
+                        if !key_info.contains(&item) && key_info.len() < 6 {
+                            key_info.push(item);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                warn!("❌ FALLBACK: Azure NER failed, using local extraction only: {}", e);
+                info!("🔄 Falling back to hardcoded entity extraction methods");
+                // 完全降级到原有的硬编码方法
+                return Ok(self.extract_comprehensive_key_information(contexts));
+            }
+        }
+
+        info!("🎯 Final result: {} key information items extracted (Azure NER + Local)", key_info.len());
+        Ok(key_info)
+    }
+
+    // 🔧 新增：将 Azure 实体转换为业务相关信息
+    fn convert_azure_entity_to_business_info(&self, entity: &AzureEntity) -> String {
+        match entity.category.as_str() {
+            "Person" => {
+                format!("Contact: {}", entity.text)
+            }
+            "Organization" => {
+                format!("Company: {}", entity.text)
+            }
+            "Location" => {
+                format!("Location: {}", entity.text)
+            }
+            "DateTime" => {
+                format!("Timeline: {}", entity.text)
+            }
+            "Quantity" => {
+                if entity.text.contains("thousand") || entity.text.contains("million") {
+                    format!("Scale: {}", entity.text)
+                } else {
+                    format!("Metric: {}", entity.text)
+                }
+            }
+            "PersonType" => {
+                format!("Role: {}", entity.text)
+            }
+            "Product" => {
+                format!("Product: {}", entity.text)
+            }
+            "Event" => {
+                format!("Event: {}", entity.text)
+            }
+            _ => {
+                // ���于其他类型，根据子类别进一步分类
+                if let Some(subcategory) = &entity.subcategory {
+                    format!("{}: {}", subcategory, entity.text)
+                } else {
+                    format!("Entity: {}", entity.text)
+                }
+            }
+        }
+    }
+
+    // 🔧 新增：使用 Azure NER 增强的用户身份提取
+    async fn extract_persistent_user_identity_with_ner(&self, contexts: &[SimilarContext]) -> Result<String> {
+        // 准备文本用于 NER 分析
+        let texts: Vec<String> = contexts.iter()
+            .take(2)  // 用户身份信息通常在前几轮对话中
+            .map(|ctx| ctx.content.clone())
+            .collect();
+
+        if texts.is_empty() {
+            return Ok(String::new());
+        }
+
+        let mut identity_parts = Vec::new();
+
+        // 🔧 明确日志：显示是否尝试使用Azure NER进行身份提取
+        info!("👤 Attempting to use Azure NER for user identity extraction...");
+
+        // 尝试调用 Azure NER
+        match self.call_azure_ner(&texts).await {
+            Ok(entities) => {
+                info!("✅ SUCCESS: Azure NER found {} entities for identity analysis!", entities.len());
+                debug!("Azure NER identity entities: {:?}", entities.iter().map(|e| format!("{}({})", e.text, e.category)).collect::<Vec<_>>());
+
+                // 提取身份相关的实体
+                for entity in entities {
+                    if entity.confidence_score >= 0.8 {  // 身份信息要求更高的置信度
+                        match entity.category.as_str() {
+                            "Person" => {
+                                let name_info = format!("Name: {}", entity.text);
+                                if !identity_parts.contains(&name_info) {
+                                    identity_parts.push(name_info);
+                                    info!("🏷️  Azure NER extracted person name: {}", entity.text);
+                                }
+                            }
+                            "PersonType" => {
+                                let role_info = format!("Role: {}", entity.text);
+                                if !identity_parts.contains(&role_info) {
+                                    identity_parts.push(role_info);
+                                    info!("💼 Azure NER extracted role: {}", entity.text);
+                                }
+                            }
+                            "Organization" => {
+                                let org_info = format!("Company: {}", entity.text);
+                                if !identity_parts.contains(&org_info) {
+                                    identity_parts.push(org_info);
+                                    info!("🏢 Azure NER extracted organization: {}", entity.text);
+                                }
+                            }
+                            "Product" | "Event" => {
+                                let project_info = format!("Project: {}", entity.text);
+                                if !identity_parts.contains(&project_info) {
+                                    identity_parts.push(project_info);
+                                    info!("🚀 Azure NER extracted project/event: {}", entity.text);
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                info!("📋 Azure NER identity result: {} identity components extracted", identity_parts.len());
+
+                // 如果 NER 结果不够，补充硬编码的提取结果
+                if identity_parts.len() < 2 {
+                    info!("📝 Azure NER identity results insufficient, supplementing with local extraction...");
+                    let fallback_identity = self.extract_persistent_user_identity(contexts);
+                    if !fallback_identity.is_empty() && !identity_parts.iter().any(|part| part.contains(&fallback_identity)) {
+                        identity_parts.push(fallback_identity);
+                    }
+                }
+            }
+            Err(e) => {
+                warn!("❌ FALLBACK: Azure NER failed for identity extraction, using local methods: {}", e);
+                info!("🔄 Falling back to hardcoded identity extraction methods");
+                // 降级到原有方法
+                return Ok(self.extract_persistent_user_identity(contexts));
+            }
+        }
+
+        let final_identity = if identity_parts.is_empty() {
+            String::new()
+        } else {
+            identity_parts.join(", ")
+        };
+
+        if final_identity.is_empty() {
+            info!("🚫 No user identity information extracted");
+        } else {
+            info!("🎯 Final identity result: {} (Azure NER + Local)", final_identity);
+        }
+
+        Ok(final_identity)
+    }
+
     pub async fn process_request_with_group(
         &self,
         request: &ChatCompletionRequest,
@@ -64,7 +414,7 @@ impl ContextEngine {
             let contexts = self.storage.find_similar_contexts_in_group(group, &context_embedding, 15).await?; // 🔧 增加到15个候选
             debug!("Found {} similar contexts in group {}", contexts.len(), group);
 
-            // 🔧 智能上下文过滤：确保客户身份信息和关键业务信息优先保留
+            // 🔧 智能上下文过滤：确保客户身��信息和关键业务信息优先保留
             let mut filtered_contexts = Vec::new();
 
             // 🔧 改进：首先无条件添加所有包含客户身份的上下文
@@ -99,7 +449,7 @@ impl ContextEngine {
             debug!("Filtered contexts: {} with relaxed criteria", filtered_contexts.len());
             filtered_contexts
         } else if let Some(agent_id) = agent_id {
-            // 🔧 单Agent上下文查找 - 应用多Agent成功经验
+            // 🔧 单Agent上下文查找 - 应用多Agent��功经验
             let context_embedding = {
                 let mut provider = self.embedding_provider.lock()
                     .map_err(|e| anyhow::anyhow!("Lock error: {}", e))?;
@@ -142,11 +492,21 @@ impl ContextEngine {
         let processed_messages = if !similar_contexts.is_empty() {
             debug!("Applying context sharing with {} relevant contexts", similar_contexts.len());
 
-            // 🔧 改进：生成更详细的关键信息摘要
-            let key_info = self.extract_comprehensive_key_information(&similar_contexts);
+            // 🔧 改进：优先使用Azure NER增强的信息提取，统一错误处理
+            info!("🔍 Starting enhanced context analysis with Azure NER...");
+            let key_info = self.extract_comprehensive_key_information_with_ner(&similar_contexts).await
+                .unwrap_or_else(|e| {
+                    warn!("🔄 Azure NER unavailable ({}), using local extraction", e);
+                    self.extract_comprehensive_key_information(&similar_contexts)
+                });
 
-            // 🔧 关键修复：确保用户身份信息始终被保留
-            let user_identity_info = self.extract_persistent_user_identity(&similar_contexts);
+            // 🔧 关键修复：使用 Azure NER 增强的用户身份提取，统一错误处理
+            info!("👤 Starting user identity analysis with Azure NER...");
+            let user_identity_info = self.extract_persistent_user_identity_with_ner(&similar_contexts).await
+                .unwrap_or_else(|e| {
+                    warn!("🔄 Azure NER identity extraction unavailable ({}), using local methods", e);
+                    self.extract_persistent_user_identity(&similar_contexts)
+                });
 
             let enhanced_context = if !key_info.is_empty() {
                 let mut context_parts = Vec::new();
@@ -169,7 +529,7 @@ impl ContextEngine {
                            .unwrap_or("No context available"))
             };
 
-            // 🔧 修复：优化压缩策略，在压缩时强制保留用户身份信息
+            // 🔧 修复：优先压缩策略，在压缩时强制保留用户身份信息
             let base_messages = if request.messages.len() > 5 {  // 保持阈值为5
                 debug!("Long conversation detected ({} messages), applying identity-preserving compression", request.messages.len());
                 self.apply_identity_preserving_compression(&request.messages, &user_identity_info).await?
@@ -229,7 +589,7 @@ impl ContextEngine {
             return String::new();
         }
 
-        // 提取关键信息，而不是完整对话
+        // 提取关�����息，�����是完整对话
         let mut key_facts = Vec::new();
 
         for context in contexts.iter().take(2) { // 只取最相关的2个上下文
@@ -303,13 +663,100 @@ impl ContextEngine {
         None
     }
 
+    // 🔧 新增：使用Azure NER增强的对话历史压缩
+    async fn compress_conversation_history_with_ner(&self, messages: &[ChatMessage]) -> Result<String> {
+        if messages.is_empty() {
+            return Ok(String::new());
+        }
+
+        // 准备文本用于Azure NER分析
+        let conversation_text = messages
+            .iter()
+            .take(5) // 只分析前5条消息以控制成本
+            .map(|msg| format!("{}: {}", msg.role, msg.content))
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        info!("🔍 Using Azure NER for conversation history compression...");
+
+        // 尝试使用Azure NER提取关键实体
+        match self.call_azure_ner(&[conversation_text]).await {
+            Ok(entities) => {
+                info!("✅ Azure NER extracted {} entities from conversation history", entities.len());
+
+                let mut summary_components = Vec::new();
+                let mut names = Vec::new();
+                let mut organizations = Vec::new();
+                let mut topics = Vec::new();
+                let mut roles = Vec::new();
+
+                // 分类Azure NER提取的实体
+                for entity in entities {
+                    if entity.confidence_score >= 0.6 { // 较低的置信度阈值用于历史压缩
+                        match entity.category.as_str() {
+                            "Person" => {
+                                if !names.contains(&entity.text) {
+                                    names.push(entity.text);
+                                }
+                            }
+                            "Organization" => {
+                                if !organizations.contains(&entity.text) {
+                                    organizations.push(entity.text);
+                                }
+                            }
+                            "PersonType" => {
+                                if !roles.contains(&entity.text) {
+                                    roles.push(entity.text);
+                                }
+                            }
+                            "Product" | "Event" => {
+                                if !topics.contains(&entity.text) {
+                                    topics.push(entity.text);
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                // 构建智能摘要
+                if !names.is_empty() {
+                    summary_components.push(format!("Participants: {}", names.join(", ")));
+                }
+                if !organizations.is_empty() {
+                    summary_components.push(format!("Organizations: {}", organizations.join(", ")));
+                }
+                if !roles.is_empty() {
+                    summary_components.push(format!("Roles: {}", roles.join(", ")));
+                }
+                if !topics.is_empty() {
+                    summary_components.push(format!("Topics: {}", topics.join(", ")));
+                }
+
+                if summary_components.is_empty() {
+                    // 如果Azure NER没有提取到足够信息，使用本地方法补充
+                    info!("📝 Azure NER results insufficient for history, supplementing with local analysis");
+                    Ok(self.compress_conversation_history(messages))
+                } else {
+                    let azure_summary = summary_components.join("; ");
+                    info!("🎯 Azure NER conversation summary: {} components", summary_components.len());
+                    Ok(azure_summary)
+                }
+            }
+            Err(e) => {
+                warn!("🔄 Azure NER unavailable for conversation history ({}), using local compression", e);
+                Ok(self.compress_conversation_history(messages))
+            }
+        }
+    }
+
     // 🔧 改进：更智能的对话历史压缩（减少硬编码）
     fn compress_conversation_history(&self, messages: &[ChatMessage]) -> String {
         if messages.is_empty() {
             return String::new();
         }
 
-        // 🔧 使用更智能的语义提取，减少硬编码
+        // 🔧 ���用更智���的语义提取，减少硬编码
         let mut key_entities = Vec::new();
         let mut topics = std::collections::HashSet::new();
         let mut user_attributes = Vec::new();
@@ -327,7 +774,7 @@ impl ContextEngine {
                 }
 
                 // 🔧 关键改进：提取业务关键信息
-                if let Some(business_info) = self.extract_business_context(content) {
+                if let Some(business_info) = self.extract_business_details(content) {
                     if !key_entities.contains(&business_info) && key_entities.len() < 8 {
                         key_entities.push(business_info);
                     }
@@ -349,7 +796,7 @@ impl ContextEngine {
             }
         }
 
-        // 🔧 智能摘要生成 - 优先保留业务关键信息
+        // 🔧 智能摘要生成 - 优���保留业务关键信���
         let mut summary_parts = Vec::new();
 
         if !user_attributes.is_empty() {
@@ -376,90 +823,8 @@ impl ContextEngine {
         }
     }
 
-    // 🔧 新增：提取业务上下文信息
-    fn extract_business_context(&self, content: &str) -> Option<String> {
-        let content_lower = content.to_lowercase();
-
-        // 公司名称检测
-        if let Some(company) = self.extract_company_name(&content_lower) {
-            return Some(format!("company: {}", company));
-        }
-
-        // 数量和规模信息
-        if let Some(scale_info) = self.extract_scale_info(&content_lower) {
-            return Some(format!("scale: {}", scale_info));
-        }
-
-        // 业务需求
-        if let Some(requirement) = self.extract_business_requirement(&content_lower) {
-            return Some(format!("need: {}", requirement));
-        }
-
-        None
-    }
-
-    // 🔧 提取公司名称
-    fn extract_company_name(&self, content: &str) -> Option<String> {
-        // 匹配 "from [Company]" 模式
-        if content.contains("from ") {
-            if let Some(start) = content.find("from ") {
-                let after_from = &content[start + 5..];
-                if let Some(end) = after_from.find('.').or_else(|| after_from.find(',')) {
-                    let company = after_from[..end].trim();
-                    if company.len() > 2 && company.len() < 30 &&
-                       (company.contains("corp") || company.contains("inc") || company.contains(" ")) {
-                        return Some(company.to_string());
-                    }
-                }
-            }
-        }
-        None
-    }
-
-    // 🔧 提取规模信息
-    fn extract_scale_info(&self, content: &str) -> Option<String> {
-        // 数字 + 单位模式
-        let patterns = [
-            (r"(\d+[,\d]*)\s*(thousand|k)", "scale"),
-            (r"(\d+[,\d]*)\s*(million|m)", "scale"),
-            (r"(\d+[,\d]*)\s*(inquiries|users|customers)", "volume"),
-            (r"(\d+[,\d]*)\s*(per month|monthly)", "monthly"),
-        ];
-
-        for (pattern, category) in patterns {
-            if let Ok(re) = regex::Regex::new(pattern) {
-                if let Some(captures) = re.captures(content) {
-                    if let Some(number) = captures.get(1) {
-                        return Some(format!("{}: {}", category, number.as_str()));
-                    }
-                }
-            }
-        }
-        None
-    }
-
-    // 🔧 提取业务需求
-    fn extract_business_requirement(&self, content: &str) -> Option<String> {
-        let requirements = [
-            ("customer service", "cs-solution"),
-            ("ai-powered", "ai-solution"),
-            ("reduce response time", "performance"),
-            ("auto-scaling", "scalability"),
-            ("security", "security"),
-            ("compliance", "compliance"),
-            ("crm integration", "integration"),
-        ];
-
-        for (keyword, category) in requirements {
-            if content.contains(keyword) {
-                return Some(category.to_string());
-            }
-        }
-        None
-    }
-
-    pub async fn store_interaction(
-        &self, // 改回不可变引用
+    async fn store_interaction(
+        &self, // 改回��可变����用
         request: &ChatCompletionRequest,
         response: &ChatCompletionResponse,
         agent_id: Option<&str>,
@@ -565,7 +930,7 @@ impl ContextEngine {
         1.0 - (compressed_length as f32 / original_length as f32)
     }
 
-    // 🔧 智能用户身份提取（减少硬编码模式）
+    // 🔧 智能用户身份提取��减少硬编码模式）
     fn extract_user_identity_smart(&self, content: &str) -> Option<String> {
         let content_lower = content.to_lowercase();
 
@@ -642,7 +1007,7 @@ impl ContextEngine {
             topics.push("troubleshooting".to_string());
         }
 
-        // 🔧 技术主题检测
+        // 🔧 技术主题���测
         let tech_topics = [
             ("algorithm", vec!["algorithm", "sort", "search", "optimize"]),
             ("database", vec!["database", "sql", "nosql", "query"]),
@@ -660,14 +1025,14 @@ impl ContextEngine {
         topics
     }
 
-    // 🔧 新增：从多个上下文中提取关键信息
+    // 🔧 新增：从多个上下文���提取关键信息
     fn extract_key_information_from_contexts(&self, contexts: &[SimilarContext]) -> Vec<String> {
         let mut key_info = Vec::new();
 
         for context in contexts.iter().take(3) { // 只处理最相关的3个上下文
             let content = &context.content;
 
-            // 提取客户姓名和公司信息 (如 "Michael Chen from Alpha Corp")
+            // 提取客户姓名和公��信息 (如 "Michael Chen from Alpha Corp")
             if let Some(client_info) = self.extract_client_information(content) {
                 if !key_info.contains(&client_info) {
                     key_info.push(client_info);
@@ -696,11 +1061,11 @@ impl ContextEngine {
     fn extract_client_information(&self, content: &str) -> Option<String> {
         let content_lower = content.to_lowercase();
 
-        // 🔧 优先匹配完整的客户信息模式
+        // 🔧 ���先匹配完��的客户��息���式
         let client_patterns = [
             // 完整姓名 + 公司模式
             r"([A-Z][a-z]+\s+[A-Z][a-z]+)\s+from\s+([A-Z][a-zA-Z\s]+(?:Corp|Inc|LLC|Ltd|Corporation))",
-            // 简化的姓名 + 公司模式
+            // ��化的姓名 + 公司模式
             r"([A-Z][a-z]+)\s+from\s+([A-Z][a-zA-Z\s]+)",
             // 直接的客户介绍模式
             r"this\s+is\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+from\s+([A-Z][a-zA-Z\s]+)",
@@ -812,7 +1177,7 @@ impl ContextEngine {
     async fn apply_smart_compression(&self, messages: &[ChatMessage]) -> Result<Vec<ChatMessage>> {
         debug!("Applying smart compression to {} messages", messages.len());
 
-        // 🔧 移除双重检查 - 调用方已经确认需要压缩
+        // 🔧 移除双��检查 - 调用方已经确认需要压缩
         if messages.len() <= 2 {
             debug!("Too few messages for compression, returning original");
             return Ok(messages.to_vec());
@@ -830,7 +1195,7 @@ impl ContextEngine {
         let recent_messages = messages.iter().rev().take(keep_recent).rev().cloned().collect::<Vec<_>>();
         let historical_messages = &messages[..messages.len().saturating_sub(keep_recent)];
 
-        // 🔧 生成更简洁的压缩摘要
+        // �� 生成更简洁的压缩摘要
         let compressed_summary = if historical_messages.is_empty() {
             String::new()
         } else {
@@ -872,7 +1237,7 @@ impl ContextEngine {
             r"i am working on",
             r"working on (a|an)?\s*([a-zA-Z\s]+)\s*(project|system)",
             r"project about ([a-zA-Z\s]+)",
-            // 职业/角色模式
+            // 职业/角色���式
             r"i'm (a|an)\s*([a-zA-Z\s]+)",
             r"i am (a|an)\s*([a-zA-Z\s]+)",
         ];
@@ -886,7 +1251,7 @@ impl ContextEngine {
             }
         }
 
-        // 🔧 关键词检测作为后备
+        // 🔧 关��词检测作为后备
         let identity_keywords = [
             "my name", "i'm", "i am", "working on", "project about",
             "alice", "bob", "charlie", "david", "emma", "frank",
@@ -903,7 +1268,7 @@ impl ContextEngine {
         false
     }
 
-    // 🔧 新增：检测客户身份信息（用于跨Agent场景）
+    // 🔧 新增：检测客户身��信息（用于跨Agent场景）
     fn contains_client_identity(&self, content: &str) -> bool {
         let content_lower = content.to_lowercase();
 
@@ -944,14 +1309,14 @@ impl ContextEngine {
         for context in contexts.iter().take(4) { // 处理更多上下文来获得完整信息
             let content = &context.content;
 
-            // 客户身份信息
+            // 客户身份信��
             if let Some(client_info) = self.extract_client_information(content) {
                 if !key_info.contains(&client_info) {
                     key_info.push(client_info);
                 }
             }
 
-            // 业务规模和需求
+            // ��务规模和需��
             if let Some(business_detail) = self.extract_business_details(content) {
                 if !key_info.contains(&business_detail) {
                     key_info.push(business_detail);
@@ -976,7 +1341,7 @@ impl ContextEngine {
         key_info
     }
 
-    // 🔧 新增：提取技术讨论内容
+    // 🔧 ��增：提取���术讨论内容
     fn extract_technical_discussion(&self, content: &str) -> Option<String> {
         let content_lower = content.to_lowercase();
 
@@ -1076,7 +1441,7 @@ impl ContextEngine {
                 }
             }
 
-            // 提取业务信息
+            // 提取��务信息
             if let Some(business) = self.extract_business_details(content) {
                 if !business_info.contains(&business) {
                     business_info.push(business);
@@ -1119,14 +1484,14 @@ impl ContextEngine {
             let content = &context.content;
             let _content_lower = content.to_lowercase();
 
-            // 🔧 优先提取用户姓名
+            // 🔧 优先提取��户姓名
             if let Some(name) = self.extract_user_name_robust(content) {
                 if !identity_parts.iter().any(|part| part.contains(&name)) {
                     identity_parts.push(format!("Name: {}", name));
                 }
             }
 
-            // 🔧 提取工作/项目信息
+            // 🔧 提取工作/��目信息
             if let Some(project) = self.extract_project_info_robust(content) {
                 if !identity_parts.iter().any(|part| part.contains(&project)) {
                     identity_parts.push(format!("Project: {}", project));
@@ -1187,7 +1552,7 @@ impl ContextEngine {
         None
     }
 
-    // 🔧 新增：强化的项目信息提取
+    // 🔧 新增：���化的项目信息提取
     fn extract_project_info_robust(&self, content: &str) -> Option<String> {
         let content_lower = content.to_lowercase();
 
@@ -1228,7 +1593,7 @@ impl ContextEngine {
         None
     }
 
-    // 🔧 新增：强化的角色信息提取
+    // ���� 新增：强化的角���信息提取
     fn extract_role_info_robust(&self, content: &str) -> Option<String> {
         let content_lower = content.to_lowercase();
 
@@ -1253,7 +1618,7 @@ impl ContextEngine {
             }
         }
 
-        // 🔧 特定角色检测
+        // �� 特定角色检测
         let roles = [
             "data scientist", "software engineer", "developer", "engineer",
             "analyst", "researcher", "consultant", "manager"
@@ -1268,7 +1633,7 @@ impl ContextEngine {
         None
     }
 
-    // 🔧 新增：身份保护压缩方法（确保用户身份不丢失）
+    // 🔧 新增�����份保护压缩方法（确保用户身份不丢失）
     async fn apply_identity_preserving_compression(&self, messages: &[ChatMessage], user_identity: &str) -> Result<Vec<ChatMessage>> {
         debug!("Applying identity-preserving compression to {} messages, preserving: {}", messages.len(), user_identity);
 
@@ -1306,7 +1671,7 @@ impl ContextEngine {
 
         let mut result = Vec::new();
 
-        // 🔧 强制添加用户身份摘要（即使历史为空）
+        // 🔧 ��制添加用户��份摘要（即使历史��空）
         if !compressed_summary.is_empty() {
             result.push(ChatMessage {
                 role: "system".to_string(),

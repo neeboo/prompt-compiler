@@ -654,7 +654,12 @@ impl OpenAPISemanticServer {
         if text.len() <= max_length {
             text.to_string()
         } else {
-            format!("{}...", &text[..max_length])
+            // 安全地截断UTF-8文本，确保不会在字符边界中间切断
+            let mut end = max_length;
+            while end > 0 && !text.is_char_boundary(end) {
+                end -= 1;
+            }
+            format!("{}...", &text[..end])
         }
     }
 

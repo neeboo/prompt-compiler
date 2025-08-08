@@ -245,6 +245,21 @@ impl EmbeddingProvider {
         })
     }
 
+    /// 安全地截断UTF-8文本，确保不会在字符边界中间切断
+    fn truncate_text_safely(text: &str, max_bytes: usize) -> &str {
+        if text.len() <= max_bytes {
+            return text;
+        }
+
+        // 从max_bytes位置向前查找有效的字符边界
+        let mut end = max_bytes;
+        while end > 0 && !text.is_char_boundary(end) {
+            end -= 1;
+        }
+
+        &text[..end]
+    }
+
     /// 编码单个文本
     pub fn encode(&mut self, text: &str) -> Result<Vec<f32>> {
         // 检查缓存
@@ -252,12 +267,8 @@ impl EmbeddingProvider {
             return Ok(cached.clone());
         }
 
-        // 截断过长的文本
-        let truncated_text = if text.len() > self.config.max_length {
-            &text[..self.config.max_length]
-        } else {
-            text
-        };
+        // 安全地截断过长的文本
+        let truncated_text = Self::truncate_text_safely(text, self.config.max_length);
 
         // 生成embedding
         let mut embedding = self.handler.encode(truncated_text)?;

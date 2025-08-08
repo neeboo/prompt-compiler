@@ -1,0 +1,890 @@
+{
+  "test_type": "multi_agent_comparison",
+  "total_test_time": 96.58955478668213,
+  "total_conversation_turns": 20,
+  "participating_agents": 3,
+  "overall_comparison": {
+    "scenarios": {
+      "Without Context Sharing": {
+        "avg_tokens": 1933.75,
+        "total_tokens": 38675,
+        "avg_response_time": 1.692266833782196,
+        "token_growth_rate": 182.54203758654796,
+        "compression_efficiency": 0,
+        "stability_coefficient": 54.997512811517744
+      },
+      "With Context Sharing": {
+        "avg_tokens": 338.5,
+        "total_tokens": 6770,
+        "avg_response_time": 2.9348554253578185,
+        "token_growth_rate": 14.376187460417977,
+        "compression_efficiency": 0,
+        "stability_coefficient": 25.435128325637834
+      }
+    },
+    "improvements": {
+      "token_efficiency": 82.4951519069166,
+      "response_time": -73.42746231092008,
+      "token_savings": 31905
+    },
+    "summary": {
+      "better_scenario": "With Context Sharing",
+      "token_improvement_pct": 82.4951519069166,
+      "time_improvement_pct": 73.42746231092008
+    }
+  },
+  "agent_specific_metrics": {
+    "sales_manager_001": {
+      "name": "销售经理",
+      "comparison": {
+        "scenarios": {
+          "销售经理 (Without)": {
+            "avg_tokens": 1969.857142857143,
+            "total_tokens": 13789,
+            "avg_response_time": 1.6309898580823625,
+            "token_growth_rate": 258.7982382550336,
+            "compression_efficiency": 0,
+            "stability_coefficient": 59.31215498230188
+          },
+          "销售经理 (With)": {
+            "avg_tokens": 326.85714285714283,
+            "total_tokens": 2288,
+            "avg_response_time": 2.790132522583008,
+            "token_growth_rate": 28.317535545023702,
+            "compression_efficiency": 0,
+            "stability_coefficient": 21.164499138095458
+          }
+        },
+        "improvements": {
+          "token_efficiency": 83.40706360142143,
+          "response_time": -71.06988794298869,
+          "token_savings": 11501
+        },
+        "summary": {
+          "better_scenario": "销售经理 (With)",
+          "token_improvement_pct": 83.40706360142143,
+          "time_improvement_pct": 71.06988794298869
+        }
+      },
+      "turns_without": 7,
+      "turns_with": 7
+    },
+    "tech_lead_002": {
+      "name": "技术负责人",
+      "comparison": {
+        "scenarios": {
+          "技术负责人 (Without)": {
+            "avg_tokens": 1817.2857142857142,
+            "total_tokens": 12721,
+            "avg_response_time": 1.6704193183353968,
+            "token_growth_rate": 194.08123791102517,
+            "compression_efficiency": 0,
+            "stability_coefficient": 52.92646882363442
+          },
+          "技术负责人 (With)": {
+            "avg_tokens": 388.42857142857144,
+            "total_tokens": 2719,
+            "avg_response_time": 2.9206390721457347,
+            "token_growth_rate": 38.534031413612574,
+            "compression_efficiency": 0,
+            "stability_coefficient": 23.505747397844395
+          }
+        },
+        "improvements": {
+          "token_efficiency": 78.62589419070828,
+          "response_time": -74.84466565294542,
+          "token_savings": 10002
+        },
+        "summary": {
+          "better_scenario": "技术负责人 (With)",
+          "token_improvement_pct": 78.62589419070828,
+          "time_improvement_pct": 74.84466565294542
+        }
+      },
+      "turns_without": 7,
+      "turns_with": 7
+    },
+    "project_manager_003": {
+      "name": "项目经理",
+      "comparison": {
+        "scenarios": {
+          "项目经理 (Without)": {
+            "avg_tokens": 2027.5,
+            "total_tokens": 12165,
+            "avg_response_time": 1.7892454067866008,
+            "token_growth_rate": 168.63636363636363,
+            "compression_efficiency": 0,
+            "stability_coefficient": 51.07116990822684
+          },
+          "项目经理 (With)": {
+            "avg_tokens": 293.8333333333333,
+            "total_tokens": 1763,
+            "avg_response_time": 3.1202845573425293,
+            "token_growth_rate": 1.485714285714279,
+            "compression_efficiency": 0,
+            "stability_coefficient": 22.4181986820686
+          }
+        },
+        "improvements": {
+          "token_efficiency": 85.50760378133991,
+          "response_time": -74.39108942279815,
+          "token_savings": 10402
+        },
+        "summary": {
+          "better_scenario": "项目经理 (With)",
+          "token_improvement_pct": 85.50760378133991,
+          "time_improvement_pct": 74.39108942279815
+        }
+      },
+      "turns_without": 6,
+      "turns_with": 6
+    }
+  },
+  "chart_paths": {
+    "overall_comparison": "pc_node_charts/multi_agent_comparison.png"
+  },
+  "conversation_timelines": {
+    "without_context_sharing": [
+      {
+        "global_turn": 1,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 188,
+        "response_time": 2.073944091796875,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 40
+      },
+      {
+        "global_turn": 2,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 376,
+        "response_time": 1.5477478504180908,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 3,
+        "total_chars": 230
+      },
+      {
+        "global_turn": 3,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 526,
+        "response_time": 1.3265671730041504,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 5,
+        "total_chars": 432
+      },
+      {
+        "global_turn": 4,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 719,
+        "response_time": 1.2907090187072754,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 7,
+        "total_chars": 584
+      },
+      {
+        "global_turn": 5,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 913,
+        "response_time": 1.5861320495605469,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 9,
+        "total_chars": 801
+      },
+      {
+        "global_turn": 6,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 1104,
+        "response_time": 2.4475209712982178,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 11,
+        "total_chars": 1008
+      },
+      {
+        "global_turn": 7,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 1296,
+        "response_time": 2.0516698360443115,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 13,
+        "total_chars": 1204
+      },
+      {
+        "global_turn": 8,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 1477,
+        "response_time": 1.5377068519592285,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 15,
+        "total_chars": 1388
+      },
+      {
+        "global_turn": 9,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 1670,
+        "response_time": 1.4306340217590332,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 17,
+        "total_chars": 1583
+      },
+      {
+        "global_turn": 10,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 1841,
+        "response_time": 1.7420628070831299,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 19,
+        "total_chars": 1777
+      },
+      {
+        "global_turn": 11,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 2029,
+        "response_time": 1.5411956310272217,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 21,
+        "total_chars": 1926
+      },
+      {
+        "global_turn": 12,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 2215,
+        "response_time": 1.5892698764801025,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 23,
+        "total_chars": 2106
+      },
+      {
+        "global_turn": 13,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 2403,
+        "response_time": 1.9991118907928467,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 25,
+        "total_chars": 2289
+      },
+      {
+        "global_turn": 14,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 2589,
+        "response_time": 1.845811367034912,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 27,
+        "total_chars": 2458
+      },
+      {
+        "global_turn": 15,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 2757,
+        "response_time": 1.5347809791564941,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 29,
+        "total_chars": 2682
+      },
+      {
+        "global_turn": 16,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 2948,
+        "response_time": 1.8425772190093994,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 31,
+        "total_chars": 2891
+      },
+      {
+        "global_turn": 17,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 3136,
+        "response_time": 1.4357960224151611,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 33,
+        "total_chars": 3068
+      },
+      {
+        "global_turn": 18,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 3323,
+        "response_time": 1.6412718296051025,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 35,
+        "total_chars": 3246
+      },
+      {
+        "global_turn": 19,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 3514,
+        "response_time": 1.689061164855957,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 37,
+        "total_chars": 3440
+      },
+      {
+        "global_turn": 20,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 3651,
+        "response_time": 1.6917660236358643,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 39,
+        "total_chars": 3614
+      }
+    ],
+    "with_context_sharing": [
+      {
+        "global_turn": 1,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 188,
+        "response_time": 2.1366920471191406,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 40
+      },
+      {
+        "global_turn": 2,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 187,
+        "response_time": 2.369239091873169,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 32
+      },
+      {
+        "global_turn": 3,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 160,
+        "response_time": 2.2581567764282227,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 33
+      },
+      {
+        "global_turn": 4,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 305,
+        "response_time": 2.356455087661743,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 36
+      },
+      {
+        "global_turn": 5,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 354,
+        "response_time": 2.6620419025421143,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 44
+      },
+      {
+        "global_turn": 6,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 358,
+        "response_time": 2.8772659301757812,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 33
+      },
+      {
+        "global_turn": 7,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 414,
+        "response_time": 2.8144290447235107,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 39
+      },
+      {
+        "global_turn": 8,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 351,
+        "response_time": 3.022969961166382,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 25
+      },
+      {
+        "global_turn": 9,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 357,
+        "response_time": 3.587444305419922,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 32
+      },
+      {
+        "global_turn": 10,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 484,
+        "response_time": 2.658374071121216,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 35
+      },
+      {
+        "global_turn": 11,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 398,
+        "response_time": 3.7383718490600586,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 27
+      },
+      {
+        "global_turn": 12,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 452,
+        "response_time": 2.8013439178466797,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 32
+      },
+      {
+        "global_turn": 13,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 297,
+        "response_time": 2.9285531044006348,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 29
+      },
+      {
+        "global_turn": 14,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 381,
+        "response_time": 3.2564098834991455,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 30
+      },
+      {
+        "global_turn": 15,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 441,
+        "response_time": 2.7402076721191406,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 30
+      },
+      {
+        "global_turn": 16,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 295,
+        "response_time": 2.7665891647338867,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 33
+      },
+      {
+        "global_turn": 17,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 383,
+        "response_time": 2.869377851486206,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 29
+      },
+      {
+        "global_turn": 18,
+        "agent_id": "tech_lead_002",
+        "agent_name": "技术负责人",
+        "tokens": 387,
+        "response_time": 4.3988378047943115,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 30
+      },
+      {
+        "global_turn": 19,
+        "agent_id": "project_manager_003",
+        "agent_name": "项目经理",
+        "tokens": 296,
+        "response_time": 4.3036980628967285,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 27
+      },
+      {
+        "global_turn": 20,
+        "agent_id": "sales_manager_001",
+        "agent_name": "销售经理",
+        "tokens": 282,
+        "response_time": 2.150650978088379,
+        "compression_ratio": null,
+        "context_size": null,
+        "messages_sent": 1,
+        "total_chars": 26
+      }
+    ]
+  },
+  "raw_results": {
+    "without_context_sharing": {
+      "sales_manager_001": [
+        {
+          "turn": 1,
+          "tokens": 188,
+          "response_time": 2.073944091796875,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 719,
+          "response_time": 1.2907090187072754,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 1477,
+          "response_time": 1.5377068519592285,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 2029,
+          "response_time": 1.5411956310272217,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 2589,
+          "response_time": 1.845811367034912,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 3136,
+          "response_time": 1.4357960224151611,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 7,
+          "tokens": 3651,
+          "response_time": 1.6917660236358643,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ],
+      "tech_lead_002": [
+        {
+          "turn": 1,
+          "tokens": 376,
+          "response_time": 1.5477478504180908,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 913,
+          "response_time": 1.5861320495605469,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 1296,
+          "response_time": 2.0516698360443115,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 1841,
+          "response_time": 1.7420628070831299,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 2215,
+          "response_time": 1.5892698764801025,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 2757,
+          "response_time": 1.5347809791564941,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 7,
+          "tokens": 3323,
+          "response_time": 1.6412718296051025,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ],
+      "project_manager_003": [
+        {
+          "turn": 1,
+          "tokens": 526,
+          "response_time": 1.3265671730041504,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 1104,
+          "response_time": 2.4475209712982178,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 1670,
+          "response_time": 1.4306340217590332,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 2403,
+          "response_time": 1.9991118907928467,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 2948,
+          "response_time": 1.8425772190093994,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 3514,
+          "response_time": 1.689061164855957,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ]
+    },
+    "with_context_sharing": {
+      "sales_manager_001": [
+        {
+          "turn": 1,
+          "tokens": 188,
+          "response_time": 2.1366920471191406,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 305,
+          "response_time": 2.356455087661743,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 351,
+          "response_time": 3.022969961166382,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 398,
+          "response_time": 3.7383718490600586,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 381,
+          "response_time": 3.2564098834991455,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 383,
+          "response_time": 2.869377851486206,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 7,
+          "tokens": 282,
+          "response_time": 2.150650978088379,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ],
+      "tech_lead_002": [
+        {
+          "turn": 1,
+          "tokens": 187,
+          "response_time": 2.369239091873169,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 354,
+          "response_time": 2.6620419025421143,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 414,
+          "response_time": 2.8144290447235107,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 484,
+          "response_time": 2.658374071121216,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 452,
+          "response_time": 2.8013439178466797,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 441,
+          "response_time": 2.7402076721191406,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 7,
+          "tokens": 387,
+          "response_time": 4.3988378047943115,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ],
+      "project_manager_003": [
+        {
+          "turn": 1,
+          "tokens": 160,
+          "response_time": 2.2581567764282227,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 2,
+          "tokens": 358,
+          "response_time": 2.8772659301757812,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 3,
+          "tokens": 357,
+          "response_time": 3.587444305419922,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 4,
+          "tokens": 297,
+          "response_time": 2.9285531044006348,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 5,
+          "tokens": 295,
+          "response_time": 2.7665891647338867,
+          "compression_ratio": null,
+          "context_size": null
+        },
+        {
+          "turn": 6,
+          "tokens": 296,
+          "response_time": 4.3036980628967285,
+          "compression_ratio": null,
+          "context_size": null
+        }
+      ]
+    }
+  }
+}

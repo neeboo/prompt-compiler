@@ -83,6 +83,34 @@ impl LLMClient {
     ) -> Result<LLMResponse> {
         debug!("Calling LLM with {} messages", messages.len());
 
+        // 🔧 新增：打印实际传给LLM的消息内容
+        info!("📤 Sending request to LLM API:");
+        info!("  Model: {}", request.model);
+        info!("  Temperature: {:?}", request.temperature);
+        info!("  Max tokens: {:?}", request.max_tokens);
+        info!("  Messages count: {}", messages.len());
+
+        for (i, message) in messages.iter().enumerate() {
+            let content_preview = if message.content.len() > 200 {
+                // 🔧 修复：使用字符边界安全的截断方法
+                let truncated = message.content.char_indices()
+                    .take_while(|(byte_idx, _)| *byte_idx <= 200)
+                    .last()
+                    .map(|(byte_idx, ch)| byte_idx + ch.len_utf8())
+                    .unwrap_or(0);
+                format!("{}...", &message.content[..truncated])
+            } else {
+                message.content.clone()
+            };
+            info!("  Message {}: [{}] {}", i + 1, message.role, content_preview);
+        }
+
+        // 🔧 打印完整的消息内容（用于调试）
+        debug!("📋 Full message details:");
+        for (i, message) in messages.iter().enumerate() {
+            debug!("Message {}: Role={}, Content='{}'", i + 1, message.role, message.content);
+        }
+
         let openai_request = OpenAIRequest {
             model: request.model.clone(),
             messages: messages.to_vec(),

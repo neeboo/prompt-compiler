@@ -1,0 +1,308 @@
+{
+  "test_type": "single_agent_comparison",
+  "total_test_time": 66.69946026802063,
+  "conversation_rounds": 19,
+  "comparison": {
+    "scenarios": {
+      "Without Context Sharing": {
+        "avg_tokens": 1673.4736842105262,
+        "total_tokens": 31796,
+        "avg_response_time": 1.7357188400469328,
+        "token_growth_rate": 188.32363828662082,
+        "compression_efficiency": 0,
+        "stability_coefficient": 54.517940605659454
+      },
+      "With Context Sharing": {
+        "avg_tokens": 235.10526315789474,
+        "total_tokens": 4467,
+        "avg_response_time": 1.5655631893559505,
+        "token_growth_rate": 5.160194174757278,
+        "compression_efficiency": 0,
+        "stability_coefficient": 6.516554429786526
+      }
+    },
+    "improvements": {
+      "token_efficiency": 85.95106302679582,
+      "response_time": 9.80318049012946,
+      "token_savings": 27329
+    },
+    "summary": {
+      "better_scenario": "With Context Sharing",
+      "token_improvement_pct": 85.95106302679582,
+      "time_improvement_pct": 9.80318049012946
+    }
+  },
+  "chart_path": "pc_node_charts/single_agent_comparison.png",
+  "raw_results": {
+    "without_context_sharing": [
+      {
+        "turn": 1,
+        "tokens": 172,
+        "response_time": 2.340843915939331,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 2,
+        "tokens": 340,
+        "response_time": 3.0385549068450928,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 3,
+        "tokens": 507,
+        "response_time": 2.28063702583313,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 4,
+        "tokens": 674,
+        "response_time": 1.626488208770752,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 5,
+        "tokens": 841,
+        "response_time": 1.3117799758911133,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 6,
+        "tokens": 1009,
+        "response_time": 1.827181100845337,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 7,
+        "tokens": 1173,
+        "response_time": 1.5332679748535156,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 8,
+        "tokens": 1340,
+        "response_time": 1.863306999206543,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 9,
+        "tokens": 1508,
+        "response_time": 1.311708927154541,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 10,
+        "tokens": 1676,
+        "response_time": 1.5854530334472656,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 11,
+        "tokens": 1840,
+        "response_time": 1.8118388652801514,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 12,
+        "tokens": 2007,
+        "response_time": 1.648892879486084,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 13,
+        "tokens": 2174,
+        "response_time": 1.3616259098052979,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 14,
+        "tokens": 2341,
+        "response_time": 1.3489010334014893,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 15,
+        "tokens": 2507,
+        "response_time": 1.60953688621521,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 16,
+        "tokens": 2674,
+        "response_time": 1.4106171131134033,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 17,
+        "tokens": 2839,
+        "response_time": 1.6905672550201416,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 18,
+        "tokens": 3004,
+        "response_time": 1.833503007888794,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 19,
+        "tokens": 3170,
+        "response_time": 1.5439529418945312,
+        "compression_ratio": null,
+        "context_size": null
+      }
+    ],
+    "with_context_sharing": [
+      {
+        "turn": 1,
+        "tokens": 172,
+        "response_time": 1.4982190132141113,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 2,
+        "tokens": 238,
+        "response_time": 1.295309066772461,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 3,
+        "tokens": 229,
+        "response_time": 1.402022123336792,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 4,
+        "tokens": 229,
+        "response_time": 1.6369290351867676,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 5,
+        "tokens": 239,
+        "response_time": 1.5310249328613281,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 6,
+        "tokens": 240,
+        "response_time": 2.0099589824676514,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 7,
+        "tokens": 236,
+        "response_time": 1.611833095550537,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 8,
+        "tokens": 239,
+        "response_time": 1.9056878089904785,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 9,
+        "tokens": 238,
+        "response_time": 1.430830717086792,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 10,
+        "tokens": 238,
+        "response_time": 1.8005120754241943,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 11,
+        "tokens": 239,
+        "response_time": 1.357072114944458,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 12,
+        "tokens": 242,
+        "response_time": 1.3424150943756104,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 13,
+        "tokens": 242,
+        "response_time": 1.3841710090637207,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 14,
+        "tokens": 242,
+        "response_time": 1.4992220401763916,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 15,
+        "tokens": 241,
+        "response_time": 1.5169999599456787,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 16,
+        "tokens": 242,
+        "response_time": 1.7175419330596924,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 17,
+        "tokens": 240,
+        "response_time": 1.7584092617034912,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 18,
+        "tokens": 240,
+        "response_time": 1.642388105392456,
+        "compression_ratio": null,
+        "context_size": null
+      },
+      {
+        "turn": 19,
+        "tokens": 241,
+        "response_time": 1.4051542282104492,
+        "compression_ratio": null,
+        "context_size": null
+      }
+    ]
+  }
+}

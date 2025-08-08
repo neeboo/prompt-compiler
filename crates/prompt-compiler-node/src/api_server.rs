@@ -11,7 +11,7 @@ use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tracing::{info, warn, error};
 
-use crate::{AppState, ChatCompletionRequest, ChatCompletionResponse};
+use crate::AppState;
 
 /// PC Node API Server
 pub struct PCNodeServer {
@@ -207,7 +207,7 @@ async fn stats_handler(
 /// 性能指标处理器
 async fn metrics_handler(State(_state): State<AppState>) -> Result<Json<PerformanceMetrics>, StatusCode> {
     // 由于 ContextEngine 可能还没有实现 get_performance_metrics 方法，
-    // 我���先提供一个模拟的性能指标响应
+    // 我们先提供一个模拟的性能指标响应
     let metrics = PerformanceMetrics {
         token_efficiency_improvement: 90.6,
         avg_compression_ratio: 0.1,
@@ -242,7 +242,7 @@ async fn context_groups_handler(State(_state): State<AppState>) -> Result<Json<V
         "sales_pipeline".to_string(),
         "technical_discussion".to_string(),
     ];
-
+    
     Ok(Json(groups))
 }
 
